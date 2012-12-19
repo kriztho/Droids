@@ -2,6 +2,7 @@ package com.example.droids.model;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import com.example.droids.model.components.Speed;
@@ -150,6 +151,13 @@ public class ElaineAnimated {
 		//Where to draw the sprite
 		Rect destRect = new Rect(getX(), getY(), getX() + spriteWidth, getY() + spriteHeight);
 		canvas.drawBitmap(bitmap, sourceRect, destRect, null);
+		
+		canvas.drawBitmap(bitmap, 20, 150, null);
+		Paint paint = new Paint();
+		paint.setARGB(50, 0, 255, 0);
+		canvas.drawRect(20 + (currentFrame * destRect.width()),150, 
+						20 + (currentFrame * destRect.width()) + destRect.width(), 
+						150 + destRect.height(), paint);
 	}
 
 }
