@@ -3,18 +3,29 @@ package com.example.droids.model;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
+import com.example.droids.model.components.Speed;
 
 public class Droid {
 	
-	private Bitmap bitmap; 	//actual bitmap
-	private int x; 			//x coordinate
-	private int y;			//y coordinate
-	private boolean touched;//if droid is touched
-
+	private Bitmap bitmap; 	// actual bitmap
+	private int x; 			// x coordinate
+	private int y;			// y coordinate
+	private boolean touched;// if droid is touched
+	private Speed speed; 	// Speed object
+	
 	public Droid( Bitmap bitmap, int x, int y ) {
 		this.bitmap = bitmap;
 		this.x = x;
 		this.y = y;
+		this.speed = new Speed();
+	}
+
+	public Droid( Bitmap bitmap, int x, int y, Speed speed ) {
+		this.bitmap = bitmap;
+		this.x = x;
+		this.y = y;
+		//this.speed = new Speed();
+		this.speed = speed;
 	}
 
 	public Bitmap getBitmap() {
@@ -49,6 +60,14 @@ public class Droid {
 		this.touched = touched;
 	}
 	
+	public Speed getSpeed() {
+		return speed;
+	}
+	
+	public void setSpeed( Speed speed ) {
+		this.speed = speed;
+	}
+	
 	public void draw( Canvas canvas ) {
 		//Coordinates are in the center of the bitmap... so move to top left corner
 		canvas.drawBitmap(bitmap, x - (bitmap.getWidth() / 2), y - (bitmap.getHeight() / 2), null);
@@ -56,8 +75,8 @@ public class Droid {
 	
 	public void handleActionDown(int eventX, int eventY) {
 		//Is the touch within the bitmap area?
-		if (eventX >= (x - bitmap.getWidth() / 2) && (eventX <= (x + bitmap.getWidth()/2))) {
-			if (eventY >= (y - bitmap.getHeight() / 2) && (eventY <= (y + bitmap.getHeight()/2 ))) {
+		if (eventX >= (x - (2*bitmap.getWidth() / 2)) && (eventX <= (x + (2*bitmap.getWidth()/2)))) {
+			if (eventY >= (y - (2*bitmap.getHeight() / 2)) && (eventY <= (y + (2*bitmap.getHeight()/2) ))) {
 				//droid touched
 				setTouched(true);
 			} else {
@@ -65,6 +84,13 @@ public class Droid {
 			} 
 		} else { 
 			setTouched(false);
+		}
+	}
+	
+	public void update() {
+		if (!touched){
+			x += (speed.getXv() * speed.getxDirection());
+			y += (speed.getYv() * speed.getyDirection());
 		}
 	}
 }
