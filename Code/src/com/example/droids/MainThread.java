@@ -67,7 +67,7 @@ public class MainThread extends Thread {
 	public void run() {
 		Canvas canvas;
 		//long tickCount = 0L;
-		Log.d(TAG, "Starting game loop");
+		//Log.d(TAG, "Starting game loop");
 		
 		// initialise timing elements for stat gathering
 		initTimingElements();
@@ -90,7 +90,7 @@ public class MainThread extends Thread {
 			// on the surface			
 			try {
 				
-				Log.d(TAG," Loop ");
+				//Log.d(TAG," Loop ");
 				
 				canvas = this.surfaceHolder.lockCanvas();
 				synchronized (surfaceHolder) {
@@ -192,6 +192,9 @@ public class MainThread extends Thread {
 					// calling the routine to store the gathered statistics
 					storeStats();
 				}
+			} catch (Exception e) {
+			     // This will catch any exception, because they are all descended from Exception
+				Log.d(TAG, "Exception: "+e.toString()+ " Msg: "+e.getMessage());
 			} finally {
 				//in case of an exception the surface is not left in an inconsistent state
 				if (canvas != null) {
@@ -264,6 +267,32 @@ public class MainThread extends Thread {
 		for ( int i = 0; i < FPS_HISTORY_NR; i++ ){
 			fpsStore[i] = 0.0;
 		}
-		Log.d(TAG, ".initTimingElements()", null);
+		Log.d(TAG, "initTimingElements()", null);
+	}
+
+	
+	@Override
+	public void destroy() {
+		super.destroy();
+	}
+
+	@Override
+	public UncaughtExceptionHandler getUncaughtExceptionHandler() {
+		return super.getUncaughtExceptionHandler();
+	}
+
+	@Override
+	public void interrupt() {
+		super.interrupt();
+	}
+
+	@Override
+	public boolean isInterrupted() {
+		return super.isInterrupted();
+	}
+
+	@Override
+	public void setUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
+		super.setUncaughtExceptionHandler(handler);
 	}
 }
