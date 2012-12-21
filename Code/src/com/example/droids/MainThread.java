@@ -269,30 +269,4 @@ public class MainThread extends Thread {
 		}
 		Log.d(TAG, "initTimingElements()", null);
 	}
-
-	
-	@Override
-	public void destroy() {
-		super.destroy();
-	}
-
-	@Override
-	public UncaughtExceptionHandler getUncaughtExceptionHandler() {
-		return super.getUncaughtExceptionHandler();
-	}
-
-	@Override
-	public void interrupt() {
-		super.interrupt();
-	}
-
-	@Override
-	public boolean isInterrupted() {
-		return super.isInterrupted();
-	}
-
-	@Override
-	public void setUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
-		super.setUncaughtExceptionHandler(handler);
-	}
 }
