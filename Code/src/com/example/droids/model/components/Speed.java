@@ -1,6 +1,11 @@
 package com.example.droids.model.components;
 
+import android.util.Log;
+
 public class Speed {
+	
+	//Tag for logging on Android's Log
+	private static final String TAG = Speed.class.getSimpleName();
 
 	// Unitary axes
 	public static final int DIRECTION_RIGHT = 1;
@@ -12,11 +17,23 @@ public class Speed {
 	private float yv = 1; // velocity value on the Y axis
 	
 	private int xDirection = DIRECTION_RIGHT;
-	private int yDirection = DIRECTION_LEFT;
+	private int yDirection = DIRECTION_DOWN;
 	
 	public Speed() {
+		
 		this.xv = 5;
 		this.yv = 5;
+		
+		// generate a random direction
+		if (rndInt(0, 1) == 0)
+			this.xDirection = DIRECTION_RIGHT;
+		else
+			this.xDirection = DIRECTION_LEFT;
+		
+		if (rndInt(0, 1) == 0)
+			this.yDirection = DIRECTION_UP;
+		else
+			this.yDirection = DIRECTION_DOWN;
 	}
 	
 	public Speed(float xv, float yv) {
@@ -64,5 +81,34 @@ public class Speed {
 	//Changes the direction on the X axis
 	public void toggleyDirection(){
 		yDirection *= -1;
+	}
+
+	public void random(int min, int max) {	
+		this.xv = (float) (rndDbl(0, max));
+		
+		if (this.xv < 0)
+			Log.d(TAG, "Something was negative!!: min="+ min+ " max="+max+" n="+this.xv);
+		
+		this.yv = (float) (rndDbl(0, max));
+		
+		if (this.yv < 0)
+			Log.d(TAG, "Something was negative!!: min="+ min+ " max="+max+" n="+this.yv);
+	}
+
+	public void smooth(int maxSpeed, double smoothFactor) {
+		if (xv * xv + yv * yv > maxSpeed * maxSpeed) {
+			xv *= smoothFactor;
+			yv *= smoothFactor;
+		}		
+	}
+	
+	// Return an integer that ranges from min inclusive to max inclusive.
+	static int rndInt(int min, int max) {
+		return (int) (min + Math.random() * (max - min + 1));
+	}
+
+	static double rndDbl(double min, double max) {
+		
+		return min + (max - min) * Math.random();
 	}
 }

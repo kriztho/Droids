@@ -1,31 +1,77 @@
 package com.example.droids;
 
 import android.os.Bundle;
-import android.app.Activity;
+import android.app.ListActivity;
+import android.content.Intent;
+import android.graphics.Color;
 import android.view.Menu;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 //Called when the activity is created
-public class MainActivity extends Activity {
+public class MainActivity extends ListActivity implements OnItemClickListener {
 	
 	private static final String TAG = MainActivity.class.getSimpleName();
+	/*
+	private ListView listViewDemos;
+	private ArrayAdapter<String> dataAdapterDemos;
+	private ArrayList<String> dataDemos;
+	*/
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
 		super.onCreate(savedInstanceState);
 		
-		//request to turn the title OFF
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		/*
+		// Create LinearLayout
+		LinearLayout layout = new LinearLayout(this);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		layout.setLayoutParams(new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.FILL_PARENT, 
+				LinearLayout.LayoutParams.FILL_PARENT));
 		
-		//making it full screen
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// Create ArrayList
+		dataDemos = new ArrayList<String>();
+		dataDemos.add("1. Droidz");
+		dataDemos.add("2. Animated Elaine");
+		dataDemos.add("3. Fireworks");
 		
-		//set our MainGamePanel as the View
-		//setContentView(R.layout.activity_main);
-		setContentView(new MainGamePanel(this));
+		// Create the adapter
+		dataAdapterDemos = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menu);
+		
+		// Create view
+		listViewDemos = new ListView(this);
+		listViewDemos.setAdapter(dataAdapterDemos);
+		listViewDemos.setOnItemClickListener(this);
+		*/
+		
+		// Creating label
+		TextView txtViewTitle = new TextView(this);
+		txtViewTitle.setText("Demos List");
+		txtViewTitle.setTextSize(20);
+		txtViewTitle.setGravity(Gravity.CENTER_HORIZONTAL);
+		txtViewTitle.setTextColor(Color.GRAY);
+		
+		String[] menu = new String[] {
+		        "1. Droidz",
+		        "2. Animate Elaine",
+		        "3. Fireworks"
+		};
+		
+		// Configure the list
+		getListView().addHeaderView(txtViewTitle);
+		setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menu));
+		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		getListView().setTextFilterEnabled(true);
+		
+		setContentView(getListView());
 		Log.d(TAG, "View Added");
 	}
 
@@ -48,4 +94,24 @@ public class MainActivity extends Activity {
 		super.onStop();
 	}
 
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		
+		super.onListItemClick(l, v, position, id);
+		launchDemo(position);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	}
+	
+	public void launchDemo(int id) {
+		
+		Intent launchDemo = new Intent(getApplicationContext(), LaunchDemo.class);
+		
+		 //passing information to launched activity
+        launchDemo.putExtra("demoId", id);
+		
+        startActivity(launchDemo);
+	}
 }

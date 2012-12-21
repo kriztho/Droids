@@ -2,10 +2,12 @@ package com.example.droids.model;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.view.MotionEvent;
+
 import com.example.droids.model.components.Speed;
 
 public class Droid {
+	
+	private static final String TAG = Droid.class.getSimpleName();
 	
 	private Bitmap bitmap; 	// actual bitmap
 	private int x; 			// x coordinate
