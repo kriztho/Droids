@@ -113,4 +113,9 @@ public class Speed {
 		
 		return min + (max - min) * Math.random();
 	}
+	
+	public void multiply(int factor){
+		this.xv *= factor;
+		this.yv *= factor;
+	}
 }

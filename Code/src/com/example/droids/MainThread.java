@@ -257,7 +257,7 @@ public class MainThread extends Thread {
 			statusIntervalTimer = System.currentTimeMillis();
 			lastStatusStore = statusIntervalTimer;
 			//Log.d(TAG, "Average FPS: " + df.format(averageFps));
-			gamePanel.setAvgFps("FPS: " + df.format(averageFps));
+			gamePanel.setAvgFps(averageFps);
 		}
 	}
 	

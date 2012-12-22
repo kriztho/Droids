@@ -26,6 +26,26 @@
             android:name="com.example.droids.LaunchDemo"
             android:label="@string/title_activity_launch_demo" >
         </activity>
+        <activity
+            android:name="com.example.droids.Preferences"
+            android:label="@string/title_activity_preferences" >
+        </activity>
+        <activity
+            android:name="com.example.droids.PrefDroidz"
+            android:label="@string/title_activity_pref_droidz" >
+        </activity>
+        <activity
+            android:name="com.example.droids.DroidzActivity"
+            android:label="@string/title_activity_droidz" >
+        </activity>
+        <activity
+            android:name="com.example.droids.AnimatedElaineActivity"
+            android:label="@string/title_activity_animated_elaine" >
+        </activity>
+        <activity
+            android:name="com.example.droids.FireworksActivity"
+            android:label="@string/title_activity_fireworks" >
+        </activity>
     </application>
 
 </manifest>

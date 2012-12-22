@@ -107,11 +107,21 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	
 	public void launchDemo(int id) {
 		
-		Intent launchDemo = new Intent(getApplicationContext(), LaunchDemo.class);
+		Intent demo = null;
 		
-		 //passing information to launched activity
-        launchDemo.putExtra("demoId", id);
+		switch(id){
 		
-        startActivity(launchDemo);
+			case 1:
+				demo = new Intent(getApplicationContext(), DroidzActivity.class);
+				break;
+			case 2:
+				demo = new Intent(getApplicationContext(), AnimatedElaineActivity.class);
+				break;
+			case 3:
+				demo = new Intent(getApplicationContext(), FireworksActivity.class);
+				break;
+		}
+		
+        startActivity(demo);
 	}
 }

@@ -2,6 +2,7 @@ package com.example.droids.model;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import com.example.droids.model.components.Speed;
 
@@ -87,10 +88,48 @@ public class Droid {
 		}
 	}
 	
-	public void update() {
-		if (!touched){
-			x += (speed.getXv() * speed.getxDirection());
-			y += (speed.getYv() * speed.getyDirection());
+	public void detectCollisions(Rect frameBox){
+		
+		// check collision with right wall if heading right
+		if (this.getSpeed().getxDirection() == Speed.DIRECTION_RIGHT
+				&& this.getX() + this.getBitmap().getWidth() / 2 >= frameBox.right) {
+			this.getSpeed().togglexDirection();
 		}
+		// check collision with left wall if heading left
+		if (this.getSpeed().getxDirection() == Speed.DIRECTION_LEFT
+				&& this.getX() - this.getBitmap().getWidth() / 2 <= frameBox.left) {
+			this.getSpeed().togglexDirection();
+		}
+		// check collision with bottom wall if heading down
+		if (this.getSpeed().getyDirection() == Speed.DIRECTION_DOWN
+				&& this.getY() + this.getBitmap().getHeight() / 2 >= frameBox.bottom) {
+			this.getSpeed().toggleyDirection();
+		}
+		// check collision with top wall if heading up
+		if (this.getSpeed().getyDirection() == Speed.DIRECTION_UP
+				&& this.getY() - this.getBitmap().getHeight() / 2 <= frameBox.top) {
+			this.getSpeed().toggleyDirection();
+		}
+	}
+	
+	public void update(Rect frameBox, int speedFactor) {
+		if (!touched){
+			
+			//Saving up on paused animation
+			if ( speedFactor != 0 ) {
+			
+				// Detect collisions and make proper changes when necessary
+				detectCollisions(frameBox);
+				
+				//Log.d(TAG, "x=" + this.x + " xv=" + this.speed.getXv());
+				
+				x += (speed.getXv() * speed.getxDirection() * speedFactor);
+				y += (speed.getYv() * speed.getyDirection() * speedFactor);
+			}
+		}
+	}
+	
+	public void multiplySpeed(int factor) {
+		this.speed.multiply(factor);
 	}
 }

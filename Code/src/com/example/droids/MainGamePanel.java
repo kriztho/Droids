@@ -1,8 +1,11 @@
 package com.example.droids;
 
+import java.text.DecimalFormat;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
@@ -10,7 +13,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.Log;
 
-public abstract class MainGamePanel extends SurfaceView implements 
+public class MainGamePanel extends SurfaceView implements 
   SurfaceHolder.Callback {		
 	
 	//Tag for logging on Android's Log
@@ -19,19 +22,13 @@ public abstract class MainGamePanel extends SurfaceView implements
 	//Main Thread of the Game
 	private MainThread thread;
 	protected Rect frameBox;
-	protected String avgFps;	
+	protected double avgFps;
+	protected String[] floatingInfoArray;
+	protected String floatingInfo;
 
 	public MainGamePanel(Context context) {
 		
 		super(context);
-		
-		/*
-		// adding the callback (this) to the surface holder to intercept events
-		getHolder().addCallback(this);
-		
-		// make the GamePanel focusable so it can handle events
-		setFocusable(true);
-		*/
 	}
 
 	@Override
@@ -87,21 +84,56 @@ public abstract class MainGamePanel extends SurfaceView implements
 	 }
 
 	 @Override
-	 abstract public boolean onTouchEvent(MotionEvent event);
-
-	 public void setAvgFps( String avgFps ) {
-		 this.avgFps = avgFps;
+	 public boolean onTouchEvent(MotionEvent event){
+		 return true;
 	 }
 	 
-	 protected void displayFps( Canvas canvas, String fps ){
-		 if ( canvas != null && fps != null ) {
+	public double getAvgFps() {
+		return avgFps;
+	}
+	
+	public void setAvgFps( double avgFps ) {
+		 this.avgFps = avgFps;
+	}
+	
+	protected void updateFloatingInfo( int infoId, String infoName, String info ) {
+		
+		floatingInfo = collapseStringArray(floatingInfoArray);
+	}
+	
+	protected String collapseStringArray(String string[]) {
+		String text = "";
+		for (int i = 0; i < string.length; i++) {
+			if ( string[i] != null )
+				text += string[i] + " ";
+		}
+		
+		return text;
+	}
+	
+	protected void displayFloatingInfo( Canvas canvas ) {
+		
+		if ( canvas != null && floatingInfo != null ) {
+			
+			Paint paint = new Paint();
+			paint.setColor(Color.WHITE);
+			canvas.drawText(floatingInfo, 30, 30, paint);
+		}
+	}
+	 
+	 protected void displayFps( Canvas canvas, double fps ){
+		 
+		 if ( canvas != null && fps != -1 ) {	
+			 
+			 DecimalFormat df = new DecimalFormat("0.##");
+			 
 			 Paint paint = new Paint();
-			 paint.setARGB(255, 255, 255, 255);
-			 canvas.drawText(fps, this.getWidth() - 70, 30, paint);
+			 paint.setARGB(255, 255, 255, 255);			 
+			 canvas.drawText("FPS: " + df.format(fps), this.getWidth() - 70, 30, paint);
 		 }
 	 }
 	 
-	 abstract public void render(Canvas canvas);
+	 public void render(Canvas canvas){}
 	 
-	 abstract public void update();
+	 public void update(){}
 }
