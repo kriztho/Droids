@@ -25,6 +25,7 @@ public class PrefDroidz extends PreferenceActivity implements OnPreferenceClickL
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.layout.activity_pref_droidz);
 		
@@ -90,11 +91,18 @@ public class PrefDroidz extends PreferenceActivity implements OnPreferenceClickL
 	}
 
 	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+
+
+	
+	@Override
 	protected void onDestroy() {
 		finish();
 		super.onDestroy();
 	}
-
 
 	@Override
 	public boolean onPreferenceClick(Preference preference) {

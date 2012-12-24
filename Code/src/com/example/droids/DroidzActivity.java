@@ -1,7 +1,5 @@
 package com.example.droids;
 
-import com.example.droids.model.components.Speed;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -14,9 +12,10 @@ import android.widget.Toast;
 
 public class DroidzActivity extends Activity {
 	
-	private static final String TAG = LaunchDemo.class.getSimpleName();
-	private static final int REQUEST_CODE = 1001;
+	private static final String TAG = DroidzActivity.class.getSimpleName();
+	private static final int REQUEST_CODE = 1;
 	private Droidz gamePanel;
+	private String aboutMsg;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +26,7 @@ public class DroidzActivity extends Activity {
 		//making it full screen
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
+		aboutMsg = "Please define a msg on the preferences";
 		gamePanel = new Droidz(getApplicationContext());
 		setContentView(gamePanel);
 	}
@@ -52,6 +52,10 @@ public class DroidzActivity extends Activity {
 		//preference.putExtra("fps", gamePanel.getAvgFps());
 		//startActivity(preference);
 		startActivityForResult(preference, REQUEST_CODE);
+	}
+	
+	public void showAbout() {
+		makeToast(aboutMsg);		
 	}
 	
 	 @Override
@@ -81,13 +85,15 @@ public class DroidzActivity extends Activity {
         	   } else {
         		   makeToast("Error at receiving numberDroids");
         	   }
+    		   
+    		   aboutMsg = extras.getString("aboutMsg");
+    		   if ( aboutMsg == null ) {
+    			   //makeToast("Msg is null");
+    			   aboutMsg = "Message was null";
+    		   }
     	   }
        }       
     }
-	
-	public void showAbout() {
-		makeToast("About Page");		
-	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

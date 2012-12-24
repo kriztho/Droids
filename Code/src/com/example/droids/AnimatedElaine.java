@@ -54,7 +54,10 @@ SurfaceHolder.Callback {
 		//Drawing Elaine
 		elaine.draw(canvas);
 		
-		displayFps(canvas, avgFps);
+		//displayFps(canvas, avgFps);
+		if ( !floatingFPS.display(canvas) )
+			makeToast("Error. There was a problem displaying FPS");
+		
 	 }
 	 
 	 public void updateElaine(){

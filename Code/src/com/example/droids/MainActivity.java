@@ -13,6 +13,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 //Called when the activity is created
 public class MainActivity extends ListActivity implements OnItemClickListener {
@@ -105,6 +106,11 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 	}
 	
+	public void makeToast(CharSequence text) {
+		Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+		toast.show();
+	}
+	
 	public void launchDemo(int id) {
 		
 		Intent demo = null;
@@ -122,6 +128,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 				break;
 		}
 		
-        startActivity(demo);
+		if ( demo != null)
+			startActivity(demo);
 	}
 }

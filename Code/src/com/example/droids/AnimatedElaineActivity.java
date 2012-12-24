@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 public class AnimatedElaineActivity extends Activity {
 	
-	private static final String TAG = LaunchDemo.class.getSimpleName();
+	private static final String TAG = AnimatedElaine.class.getSimpleName();
 	private AnimatedElaine gamePanel;
 
 	@Override

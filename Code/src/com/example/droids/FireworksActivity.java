@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 public class FireworksActivity extends Activity {
 	
-	private static final String TAG = LaunchDemo.class.getSimpleName();
+	private static final String TAG = FireworksActivity.class.getSimpleName();
 	private Fireworks gamePanel;
 
 	@Override
@@ -40,7 +40,8 @@ public class FireworksActivity extends Activity {
 		toast.show();
 	}
 	
-	public void showSettings() {
+	public void updateFireworks(int option) {
+		/*
 		//makeToast("Settings Page!");
 		Intent preference = new Intent(getApplicationContext(), PrefDroidz.class);
 		
@@ -50,22 +51,29 @@ public class FireworksActivity extends Activity {
 		//preference.putExtra("numberDroids", gamePanel.get);
 		//preference.putExtra("fps", gamePanel.getAvgFps());
 		startActivity(preference);
-	}
-	
-	public void showAbout() {
-		//makeToast("About Page");
-		makeToast("Speed: "+gamePanel.getAvgFps());
+		*/
+		
+		int size = gamePanel.getFireworksSize();
+		
+		// Increase fireworks
+		if ( option == 0 ) {
+			size++;
+			gamePanel.setFireworksSize(size);
+		} else { // decrease fireworks
+			size--;
+			gamePanel.setFireworksSize(size);
+		}
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
 	    switch (item.getItemId()) {
-	        case R.id.settings:	        	
-	            showSettings();
+	        case R.id.decFireworks:
+	            updateFireworks(0); // increase
 	            return true;
-	        case R.id.about:	        	
-	            showAbout();
+	        case R.id.incFireworks:
+	            updateFireworks(1); // decrease
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);

@@ -12,5 +12,6 @@
     <string name="title_activity_droidz">DroidzActivity</string>
     <string name="title_activity_animated_elaine">AnimatedElaineActivity</string>
     <string name="title_activity_fireworks">FireworksActivity</string>
+    <string name="title_activity_fireworks_prefs">FireworksPrefs</string>
 
 </resources>

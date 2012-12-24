@@ -1,8 +1,6 @@
 package com.example.droids;
 
 import java.text.DecimalFormat;
-
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,6 +9,7 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 import android.util.Log;
 
 public class MainGamePanel extends SurfaceView implements 
@@ -20,23 +19,24 @@ public class MainGamePanel extends SurfaceView implements
 	private static final String TAG = MainGamePanel.class.getSimpleName();
 	
 	//Main Thread of the Game
+	protected Context appContext;
 	private MainThread thread;
 	protected Rect frameBox;
 	protected double avgFps;
 	protected String[] floatingInfoArray;
 	protected String floatingInfo;
+	protected FloatingDisplay floatingFPS;
 
-	public MainGamePanel(Context context) {
-		
+	public MainGamePanel(Context context) {	
 		super(context);
+	}
+	
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 	}
 
 	@Override
-	 public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-	 }
-
-	 @Override
-	 public void surfaceCreated(SurfaceHolder holder) { 
+	public void surfaceCreated(SurfaceHolder holder) { 
 		 
 		 if ( thread != null ){
 			 if( thread.getState() == Thread.State.TERMINATED ) {
@@ -56,11 +56,16 @@ public class MainGamePanel extends SurfaceView implements
 		 thread.start();
 		 
 		// Framing box for collisiong detection
-		frameBox = new Rect(10, 10, getWidth()-10, getHeight()-10);
+		frameBox = new Rect(10, 10, getWidth()-10, getHeight()-30);
+		
+		//Init floating
+		floatingFPS = new FloatingDisplay(1, "bottomright", Color.WHITE, getWidth(), getHeight());
+		floatingFPS.addParam("fps", 0);
 	 }
 
-	 @Override
-	 public void surfaceDestroyed(SurfaceHolder holder) {
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		
 		 //tell the thread to shut down and wait for it to finish
 		 //this is a clean shutdown
 		 boolean retry = true;
@@ -73,7 +78,7 @@ public class MainGamePanel extends SurfaceView implements
 				 
 				 //Joining the thread
 				 thread.join();
-				 retry = false;
+				 retry = false;			
 				 
 			 } catch ( InterruptedException e) {
 				 //try again shutting down the thread
@@ -83,8 +88,8 @@ public class MainGamePanel extends SurfaceView implements
 		 Log.d(TAG, "Thread was shut down cleanly");
 	 }
 
-	 @Override
-	 public boolean onTouchEvent(MotionEvent event){
+	@Override
+	public boolean onTouchEvent(MotionEvent event){
 		 return true;
 	 }
 	 
@@ -94,46 +99,15 @@ public class MainGamePanel extends SurfaceView implements
 	
 	public void setAvgFps( double avgFps ) {
 		 this.avgFps = avgFps;
-	}
-	
-	protected void updateFloatingInfo( int infoId, String infoName, String info ) {
-		
-		floatingInfo = collapseStringArray(floatingInfoArray);
-	}
-	
-	protected String collapseStringArray(String string[]) {
-		String text = "";
-		for (int i = 0; i < string.length; i++) {
-			if ( string[i] != null )
-				text += string[i] + " ";
-		}
-		
-		return text;
-	}
-	
-	protected void displayFloatingInfo( Canvas canvas ) {
-		
-		if ( canvas != null && floatingInfo != null ) {
-			
-			Paint paint = new Paint();
-			paint.setColor(Color.WHITE);
-			canvas.drawText(floatingInfo, 30, 30, paint);
-		}
+		 floatingFPS.updateParam("fps", this.avgFps);
 	}
 	 
-	 protected void displayFps( Canvas canvas, double fps ){
-		 
-		 if ( canvas != null && fps != -1 ) {	
-			 
-			 DecimalFormat df = new DecimalFormat("0.##");
-			 
-			 Paint paint = new Paint();
-			 paint.setARGB(255, 255, 255, 255);			 
-			 canvas.drawText("FPS: " + df.format(fps), this.getWidth() - 70, 30, paint);
-		 }
-	 }
+	public void render(Canvas canvas){}
 	 
-	 public void render(Canvas canvas){}
-	 
-	 public void update(){}
+	public void update(){}
+	
+	protected void makeToast(CharSequence text) {
+		Toast toast = Toast.makeText(appContext, text, Toast.LENGTH_SHORT);
+		toast.show();
+	}
 }

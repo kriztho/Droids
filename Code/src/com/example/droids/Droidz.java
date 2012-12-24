@@ -1,14 +1,12 @@
 package com.example.droids;
 
 import com.example.droids.model.Droid;
-import com.example.droids.model.components.Speed;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -18,15 +16,13 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	
 	//Tag for logging on Android's Log
 	private static final String TAG = Droidz.class.getSimpleName();
-	private static final int MAX_NUMBER_DROIDS = 10;
-	private static final int FLOATING_INFO_PARAMS = 2;
+	private static final int MAX_NUMBER_DROIDS = 30;
 	
-	//private Droid droid;
 	private Droid[] droids;
-	private int animationSpeedFactor = 1;
+	private int animationSpeedFactor;
 	private int currentNumberDroids;
 	private int index;
-	private Context appContext;
+	private FloatingDisplay floatingDisplay;
 
 	public Droidz(Context context) {
 		super(context);
@@ -34,16 +30,12 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		// adding the callback (this) to the surface holder to intercept events
 		getHolder().addCallback(this);
 		
+		//Set context
 		appContext = context;
 		animationSpeedFactor = 1; 				//Normal speed
 		currentNumberDroids = 0;				// Starts out with 0 droids
 		index = 0;								// Checks if there is any more droids to create within the maximum allowed
 		droids = new Droid[MAX_NUMBER_DROIDS];	//Create droid and load bitmap
-		
-		//Heads up display
-		floatingInfoArray = new String[FLOATING_INFO_PARAMS];
-		updateFloatingInfo(0, "Speed", ""+animationSpeedFactor);
-		updateFloatingInfo(1, "Droids", ""+currentNumberDroids);
 		
 		//Starts out 1X
 		animationSpeedFactor = 1;
@@ -52,7 +44,19 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	}
 	
 	@Override
-	 public boolean onTouchEvent(MotionEvent event) {
+	public void surfaceCreated(SurfaceHolder holder) {
+		super.surfaceCreated(holder);
+		
+		//Heads up display
+		floatingDisplay = new FloatingDisplay(2, "bottomleft", Color.WHITE, getWidth(), getHeight());
+		floatingDisplay.addParam("Speed", animationSpeedFactor);
+		floatingDisplay.addParam("Droids", currentNumberDroids);
+	}
+
+
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
 		 
 		 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			 
@@ -90,18 +94,21 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	  return true;
 	 }
 	
-	 public void render(Canvas canvas) {
+	public void render(Canvas canvas) {
 		
 		 //fills the canvas with black 
 		canvas.drawColor(Color.BLACK);
 		drawDroids(canvas);
 		
 		// Display Heads Up Information
-		displayFps(canvas, avgFps);
-		displayFloatingInfo(canvas);
+		//displayFps(canvas, avgFps);
+		if ( !floatingFPS.display(canvas) )
+			makeToast("Error. There was a problem displaying FPS");
+		if ( !floatingDisplay.display(canvas) )
+			makeToast("Error. There was a problem with floating display");
 	 }
 	 
-	 public void drawDroids(Canvas canvas) {
+	public void drawDroids(Canvas canvas) {
 		 
 		 Paint paint = new Paint();
 		 paint.setARGB(255, 0, 255, 0);
@@ -115,7 +122,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 }
 	 }
 	 
-	 public void updateDroids(){
+	public void updateDroids(){
 		 
 		// Updating all droids
 		 for ( int i = 0; i < currentNumberDroids; i++ ) {
@@ -125,23 +132,10 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 
 	 }
 	 
-	 public void update() {
+	public void update() {
 		 
 		 updateDroids();
 	 }
-	 
-	 @Override
-	protected void updateFloatingInfo(int infoId, String infoName, String info) {
-		
-		floatingInfoArray[infoId] = infoName +": "+ info;	
-		
-		super.updateFloatingInfo(infoId, infoName, info);
-	}
-
-	public void makeToast(CharSequence text) {
-		Toast toast = Toast.makeText(appContext, text, Toast.LENGTH_SHORT);
-		toast.show();
-	}
 	 
 	public int getAnimationSpeedFactor() {
 		return animationSpeedFactor;
@@ -149,7 +143,8 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 
 	public void setAnimationSpeedFactor(int animationSpeedFactor) {
 		this.animationSpeedFactor = animationSpeedFactor;
-		updateFloatingInfo(0, "Speed", ""+animationSpeedFactor);
+		if ( !floatingDisplay.updateParam("Speed", animationSpeedFactor))
+			makeToast("Param SPEED couldn't be found");
 	}
 
 	public void multiplyAnimationSpeed() {
@@ -173,14 +168,18 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 				currentNumberDroids++;
 				index++;
 				
-				updateFloatingInfo(1, "Droids", ""+currentNumberDroids);
+				//Update the floating display				
+				if ( !floatingDisplay.updateParam("Droids", currentNumberDroids))
+					makeToast("Param DROIDS couldn't be found");		
 				
 			} else {				
 				droids[currentNumberDroids].setX(x);
 				droids[currentNumberDroids].setY(y);
 				currentNumberDroids++;
 				
-				updateFloatingInfo(1, "Droids", ""+currentNumberDroids);
+				//Update the floating display
+				if ( !floatingDisplay.updateParam("Droids", currentNumberDroids))
+					makeToast("Param DROIDS couldn't be found");
 			}
 		} else 
 			makeToast("Max Number Of Droids Reached");
@@ -203,7 +202,9 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			if ( newNumberDroids >= 0 ) {
 				currentNumberDroids = newNumberDroids;
 				
-				updateFloatingInfo(1, "Droids", ""+currentNumberDroids);
+				//Update the floating display
+				if ( !floatingDisplay.updateParam("Droids", currentNumberDroids))
+					makeToast("Param DROIDS couldn't be found");
 				
 			} else {
 				//Impossible to delete droids

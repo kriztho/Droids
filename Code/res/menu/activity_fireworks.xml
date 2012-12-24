@@ -1,13 +1,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <item android:id="@+id/settings" 
-        android:icon="@drawable/ic_launcher" 
-        android:menuCategory="alternative" 
-        android:title="Settings" /><item 
-        android:id="@+id/about" 
-        android:icon="@drawable/ic_help" 
-        android:menuCategory="alternative" 
-        android:titleCondensed="About" 
-        android:title="About" />
-
+    <item 
+        android:id="@+id/decFireworks" 
+        android:icon="@drawable/decrease" 
+        android:title="Dec Fireworks"/>
+    <item android:id="@+id/incFireworks" 
+        android:icon="@drawable/increase" 
+        android:title="Inc Fireworks"/>
+    
+    <!--
+    <item 
+        android:id="@+id/decExp" 
+        android:icon="@drawable/decrease"  
+        android:title="Dec Explosions"/>
+    <item android:id="@+id/incExp" 
+        android:icon="@drawable/increase"  
+        android:title="Inc Explosions"/>
+    
+    <item 
+        android:id="@+id/dec" 
+        android:icon="@drawable/decrease"  
+        android:title="Dec Explosions"/>
+    <item android:id="@+id/incExp" 
+        android:icon="@drawable/increase"  
+        android:title="Inc Explosions"/>
+        
+        -->
 </menu>

@@ -46,6 +46,10 @@
             android:name="com.example.droids.FireworksActivity"
             android:label="@string/title_activity_fireworks" >
         </activity>
+        <activity
+            android:name="com.example.droids.FireworksPrefs"
+            android:label="@string/title_activity_fireworks_prefs" >
+        </activity>
     </application>
 
 </manifest>
