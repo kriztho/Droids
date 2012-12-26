@@ -21,8 +21,14 @@ public class Particle {
 	public static final int STATE_DEAD = 1;		// particle is dead
 
 	public static final int DEFAULT_LIFETIME 	= 200;	// play with this
-	public static final int MAX_DIMENSION		= 5;	// the maximum width or height
-	public static final int MAX_SPEED			= 2;	// maximum speed (per update)
+	public static final int MAX_PARTICLE_SIZE	= 5;
+	public static final int MAX_SPEED			= 1;	// maximum speed (per update)
+	public static final int FADEOUT_FACTOR		= 2;
+	
+	private static int maxSize = MAX_PARTICLE_SIZE;	// the maximum width or height
+	private static int fadeOutFactor = FADEOUT_FACTOR;		// the amount of decreasing alpha value
+	private static int maxSpeed = MAX_SPEED;
+	private static int default_lifetime = DEFAULT_LIFETIME;
 
 	private int state;			// particle is alive or dead
 	private float width;		// width of the particle
@@ -32,7 +38,7 @@ public class Particle {
 	private int age;			// current age of the particle
 	private int lifetime;		// particle dies when it reaches this value
 	private int color;			// the color of the particle
-	private Paint paint;		// internal use to avoid instantiation
+	private Paint paint;		// internal use to avoid instantiation	
 	
 	public int getState() {
 		return state;
@@ -73,7 +79,7 @@ public class Particle {
 	public Paint getPaint() {
 		return paint;
 	}
-
+	
 	public void setState(int state) {
 		this.state = state;
 	}
@@ -114,6 +120,42 @@ public class Particle {
 		this.paint = paint;
 	}
 	
+	//////////////////////////////////
+	// Class Methods
+	//////////////////////////////////
+	
+	public static int getMaxSize() {
+		return Particle.maxSize;
+	}
+	
+	public static int getFadeOutFactor() {
+		return Particle.fadeOutFactor;
+	}
+	
+	public static int getDefaultLifetime() {
+		return Particle.default_lifetime;
+	}
+	
+	public static int getMaxSpeed() {
+		return Particle.maxSpeed;
+	}
+	
+	public static void setMaxPartSize(int newMaxSize) {
+		Particle.maxSize = newMaxSize;
+	}
+	
+	public static void setFadeOutFactor(int newFactor) {
+		Particle.fadeOutFactor = newFactor;
+	}
+	
+	public static void setDefaultLifetime(int newValue) {
+		Particle.default_lifetime = newValue;
+	}
+	
+	public static void setMaxSpeed(int newValue) {
+		Particle.maxSpeed = newValue;
+	}
+	
 	////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////
@@ -123,13 +165,49 @@ public class Particle {
 		this.x = x;
 		this.y = y;
 		this.state = Particle.STATE_ALIVE;
-		this.width = rndInt(1, MAX_DIMENSION);
+		this.width = rndInt(1, maxSize);
 		this.height = this.width;
 		this.lifetime = DEFAULT_LIFETIME;
 		this.age = 0;
 		this.speed = new Speed();
 		this.speed.random(0, MAX_SPEED);
 		this.speed.smooth(MAX_SPEED, 0.7);
+		Particle.maxSize = MAX_PARTICLE_SIZE;
+		Particle.fadeOutFactor = FADEOUT_FACTOR;
+		
+		// Multicolor
+		this.color = Color.argb(255, rndInt(0, 255), rndInt(0, 255), rndInt(0, 255));
+		this.paint = new Paint(this.color);
+	}
+	
+	public Particle( int x, int y, int maxSize, int fadeOutFactor, int defaultLifetime, int maxSpeed ){
+		this.x = x;
+		this.y = y;
+		this.state = Particle.STATE_ALIVE;
+		this.age = 0;
+		
+		if ( maxSize >= 0)
+			Particle.maxSize = maxSize;
+		else 
+			Particle.maxSize = 1;
+		
+		this.width = rndInt(1, maxSize);
+		this.height = this.width;
+
+		Particle.fadeOutFactor = fadeOutFactor;
+		
+		if ( lifetime >= 0 ){
+			this.lifetime = defaultLifetime;
+			Particle.default_lifetime = defaultLifetime;
+		} else {
+			this.lifetime = 1;
+			Particle.default_lifetime = 1;
+		}
+		
+		this.speed = new Speed();
+		this.speed.random(0, maxSpeed);
+		this.speed.smooth(maxSpeed, 0.7);
+		Particle.maxSpeed = maxSpeed;
 		
 		// Multicolor
 		this.color = Color.argb(255, rndInt(0, 255), rndInt(0, 255), rndInt(0, 255));
@@ -189,7 +267,7 @@ public class Particle {
 			
 			// extract alpha
 			int a = this.color >>> 24;
-			a -= 4;
+			a -= fadeOutFactor;
 			if ( a <= 0 ) {
 				a = 0;
 				this.state = STATE_DEAD;
@@ -203,7 +281,10 @@ public class Particle {
 			
 			if ( this.age >= this.lifetime ) {
 				this.state = STATE_DEAD;
+				this.x += this.speed.getXv();
+				this.y += this.speed.getYv();
 			}
 		}
 	}
+	
 }

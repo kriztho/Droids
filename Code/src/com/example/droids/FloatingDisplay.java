@@ -5,8 +5,11 @@ import java.util.ArrayList;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 public class FloatingDisplay {
+	
+	private static final String TAG = FloatingDisplay.class.getSimpleName();
 
 	private int paramNumber;
 	private ArrayList<Param> paramArray;
@@ -50,8 +53,8 @@ public class FloatingDisplay {
 			x = 10;
 			y = 10;
 		} else if ( position == "topright") {
-			x = canvasWidth - (paramString.length() * digitSize) - 8;
-			y = 10;
+			x = canvasWidth - (paramString.length() * digitSize) - 12;
+			y = 30;
 		} else if ( position == "bottomleft") {
 			x = 10;
 			y = canvasHeight - digitSize - 3;
@@ -99,12 +102,17 @@ public class FloatingDisplay {
 	
 	public int findParam(String paramName) {
 		int index = 0;
-		while( index <= paramArray.size() ) {
-			if ( paramArray.get(index).getParamName() == paramName ){
-				break;
+		try {
+			while( index <= paramArray.size() ) {
+				if ( paramArray.get(index).getParamName() == paramName ){
+					break;
+				}
+				index++;
 			}
-			index++;
-		}
+		} catch (Exception e) {
+			Log.d(TAG, "Exception: " + e.toString());
+			index = paramNumber;
+		} 
 		return index;
 	}
 	

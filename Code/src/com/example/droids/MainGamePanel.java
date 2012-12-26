@@ -29,6 +29,8 @@ public class MainGamePanel extends SurfaceView implements
 
 	public MainGamePanel(Context context) {	
 		super(context);
+		
+		appContext = context;
 	}
 	
 	@Override
@@ -59,7 +61,7 @@ public class MainGamePanel extends SurfaceView implements
 		frameBox = new Rect(10, 10, getWidth()-10, getHeight()-30);
 		
 		//Init floating
-		floatingFPS = new FloatingDisplay(1, "bottomright", Color.WHITE, getWidth(), getHeight());
+		floatingFPS = new FloatingDisplay(1, "topright", Color.WHITE, getWidth(), getHeight());
 		floatingFPS.addParam("fps", 0);
 	 }
 
