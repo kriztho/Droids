@@ -1,5 +1,7 @@
 package com.example.droids;
 
+import java.util.ArrayList;
+
 import com.example.droids.model.Droid;
 
 import android.content.Context;
@@ -7,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -23,6 +26,8 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	private int currentNumberDroids;
 	private int index;
 	private FloatingDisplay floatingDisplay;
+	private ArrayList<Rect> obstacles;
+	private boolean collisionDetection = true; 
 
 	public Droidz(Context context) {
 		super(context);
@@ -40,12 +45,17 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		//Starts out 1X
 		animationSpeedFactor = 1;
 		
+		obstacles = new ArrayList<Rect>();
+		
 		setFocusable(true);
 	}
 	
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		super.surfaceCreated(holder);
+		
+		if ( obstacles.size() == 0 )
+			addObstacle(frameBox);					// Adding the framebox
 		
 		//Heads up display
 		floatingDisplay = new FloatingDisplay(2, "bottomleft", Color.WHITE, getWidth(), getHeight());
@@ -60,7 +70,9 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 
 		 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			 
-			 addDroid((int)(event.getX()), (int)(event.getY()));
+			 //addDroid((int)(event.getX()), (int)(event.getY()));
+			 
+			 addObstacle((int)(event.getX()), (int)(event.getY()), 100, 100);
 					 
 			 /*
 			 //delegating event handling to the droid
@@ -70,6 +82,10 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			 */
 			 
 		 } if (event.getAction() == MotionEvent.ACTION_MOVE ) {
+			 
+			 //addObstacle((int)(event.getX()), (int)(event.getY()), 100, 100);
+			 //addObstacleAt(1, (int)(event.getX()), (int)(event.getY()), 100, 100);
+			 
 			 //the gestures
 			 /*
 			 if( droid!= null) {
@@ -93,12 +109,38 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 }
 	  return true;
 	 }
+	public void addObstacle(Rect obstacle) {
+		obstacles.add(obstacle);
+	}
+	
+	public void addObstacle(int x, int y, int width, int height) {
+		 int left = (int) (x - (width / 2.0));
+		 int right = left + width;
+		 int top = (int) (y - (height / 2.0));
+		 int bottom = top + height;
+		 Rect obstacle = new Rect(left, top, right, bottom);
+		obstacles.add(obstacle);
+	}
+	
+	public void addObstacleAt(int index, int x, int y, int width, int height) {
+		 int left = (int) (x - (width / 2.0));
+		 int right = left + width;
+		 int top = (int) (y - (height / 2.0));
+		 int bottom = top + height;
+		 Rect obstacle = new Rect(left, top, right, bottom);
+		obstacles.add(index, obstacle);
+	}
+	
+	public void removeObstacle(Rect obstacle) {
+		obstacles.remove(obstacle);
+	}
 	
 	public void render(Canvas canvas) {
 		
 		 //fills the canvas with black 
 		canvas.drawColor(Color.BLACK);
-		drawDroids(canvas);
+		drawObstacles(canvas);
+		drawDroids(canvas);		
 		
 		// Display Heads Up Information
 		//displayFps(canvas, avgFps);
@@ -106,14 +148,26 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			makeToast("Error. There was a problem displaying FPS");
 		if ( !floatingDisplay.display(canvas) )
 			makeToast("Error. There was a problem with floating display");
-	 }
+	}
+	
+	public void drawObstacles(Canvas canvas) {
+		
+		// Draw the stage as a containing box
+		 Paint paint = new Paint();
+		 paint.setColor(Color.GREEN);
+		 paint.setStyle(Paint.Style.STROKE);
+		 canvas.drawRect(obstacles.get(0), paint);
+		
+		 // Draw the rest of the obstacles
+		 paint.setColor(Color.RED);
+		 
+		// Drawing all droids in the array
+		 for ( int i = 1; i < obstacles.size(); i++ ) {
+			 canvas.drawRect(obstacles.get(i), paint);
+		 }
+	}
 	 
 	public void drawDroids(Canvas canvas) {
-		 
-		 Paint paint = new Paint();
-		 paint.setARGB(255, 0, 255, 0);
-		 paint.setStyle(Paint.Style.STROKE);
-		 canvas.drawRect(frameBox, paint);
 		 
 		// Drawing all droids in the array
 		 for ( int i = 0; i < currentNumberDroids; i++ ) {
@@ -123,12 +177,22 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	 }
 	 
 	public void updateDroids(){
-		 
-		// Updating all droids
-		 for ( int i = 0; i < currentNumberDroids; i++ ) {
-			 if (droids[i] != null)
-				 droids[i].update(frameBox, animationSpeedFactor);
-		 }
+		
+		if ( collisionDetection == true ) {
+			
+			// Updating all droids
+			 for ( int i = 0; i < currentNumberDroids; i++ ) {
+				 if (droids[i] != null)
+					 droids[i].update(obstacles, animationSpeedFactor);
+			 }
+			
+		} else {		 
+			// Updating all droids
+			 for ( int i = 0; i < currentNumberDroids; i++ ) {
+				 if (droids[i] != null)
+					 droids[i].update(frameBox, animationSpeedFactor);
+			 }
+		}
 		 
 	 }
 	 
@@ -165,6 +229,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		if ( currentNumberDroids < MAX_NUMBER_DROIDS ) {
 			if ( index < MAX_NUMBER_DROIDS ) {
 				droids[index] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y );
+				//droids[index] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y, 2 );
 				currentNumberDroids++;
 				index++;
 				
@@ -192,7 +257,8 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			// Add missing droids
 			int missingDroids = newNumberDroids - currentNumberDroids;
 			for ( int i = 0; i < missingDroids; i++ ) {
-				addDroid(rndInt(50, 270), rndInt(50, 430)); 
+				//addDroid(rndInt(frameBox.left, frameBox.right), rndInt(frameBox.top, frameBox.bottom)); 
+				addDroid(50, frameBox.bottom / 2);
 			}
 			
 			//Delete droids

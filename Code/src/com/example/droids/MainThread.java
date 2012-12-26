@@ -194,7 +194,7 @@ public class MainThread extends Thread {
 				}
 			} catch (Exception e) {
 			     // This will catch any exception, because they are all descended from Exception
-				Log.d(TAG, "Exception: "+e.toString()+ " Msg: "+e.getMessage());
+				Log.d(TAG, "Exception: "+e.toString()+ "Cause: "+e.getCause());
 			} finally {
 				//in case of an exception the surface is not left in an inconsistent state
 				if (canvas != null) {

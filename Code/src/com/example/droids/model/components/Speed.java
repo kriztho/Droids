@@ -38,9 +38,57 @@ public class Speed {
 			this.yDirection = DIRECTION_DOWN;
 	}
 	
+	public Speed(int testSpeedCase){
+		
+		switch(testSpeedCase) {
+			case 0:
+				//To the right
+				this.xv = 5;
+				this.yv = 0;
+				this.xDirection = DIRECTION_RIGHT;
+				break;
+			case 1:
+				//To the left
+				this.xv = 5;
+				this.yv = 0;
+				this.xDirection = DIRECTION_LEFT;
+				break;
+			case 2:
+				//To the top
+				this.xv = 0;
+				this.yv = 5;
+				this.yDirection = DIRECTION_UP;
+				break;
+			case 3:
+				//To the bottom
+				this.xv = 0;
+				this.yv = 5;
+				this.yDirection = DIRECTION_DOWN;
+				break;
+			default:
+				//To the right
+				this.xv = 1;
+				this.yv = 1;
+				this.xDirection = DIRECTION_RIGHT;
+				this.yDirection = DIRECTION_DOWN;
+				break;
+		}
+	}
+	
 	public Speed(float xv, float yv) {
 		this.xv = xv;
 		this.yv = yv;
+		
+		// generate a random direction
+		if (rndInt(0, 1) == 0)
+			this.xDirection = DIRECTION_RIGHT;
+		else
+			this.xDirection = DIRECTION_LEFT;
+		
+		if (rndInt(0, 1) == 0)
+			this.yDirection = DIRECTION_UP;
+		else
+			this.yDirection = DIRECTION_DOWN;
 	}
 	
 	public float getXv(){

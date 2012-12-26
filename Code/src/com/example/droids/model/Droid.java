@@ -1,5 +1,7 @@
 package com.example.droids.model;
 
+import java.util.ArrayList;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -19,6 +21,13 @@ public class Droid {
 		this.x = x;
 		this.y = y;
 		this.speed = new Speed();
+	}
+	
+	public Droid( Bitmap bitmap, int x, int y, int testSpeedCase ) {
+		this.bitmap = bitmap;
+		this.x = x;
+		this.y = y;
+		this.speed = new Speed(testSpeedCase);
 	}
 
 	public Droid( Bitmap bitmap, int x, int y, Speed speed ) {
@@ -88,27 +97,80 @@ public class Droid {
 		}
 	}
 	
-	public void detectCollisions(Rect frameBox){
+	public void detectCollisionsInside(Rect box){
 		
 		// check collision with right wall if heading right
 		if (this.getSpeed().getxDirection() == Speed.DIRECTION_RIGHT
-				&& this.getX() + this.getBitmap().getWidth() / 2 >= frameBox.right) {
+				&& this.getX() + this.getBitmap().getWidth() / 2 >= box.right) {
 			this.getSpeed().togglexDirection();
 		}
 		// check collision with left wall if heading left
 		if (this.getSpeed().getxDirection() == Speed.DIRECTION_LEFT
-				&& this.getX() - this.getBitmap().getWidth() / 2 <= frameBox.left) {
+				&& this.getX() - this.getBitmap().getWidth() / 2 <= box.left) {
 			this.getSpeed().togglexDirection();
 		}
 		// check collision with bottom wall if heading down
 		if (this.getSpeed().getyDirection() == Speed.DIRECTION_DOWN
-				&& this.getY() + this.getBitmap().getHeight() / 2 >= frameBox.bottom) {
+				&& this.getY() + this.getBitmap().getHeight() / 2 >= box.bottom) {
 			this.getSpeed().toggleyDirection();
 		}
 		// check collision with top wall if heading up
 		if (this.getSpeed().getyDirection() == Speed.DIRECTION_UP
-				&& this.getY() - this.getBitmap().getHeight() / 2 <= frameBox.top) {
+				&& this.getY() - this.getBitmap().getHeight() / 2 <= box.top) {
 			this.getSpeed().toggleyDirection();
+		}
+	}
+	
+	public void detectCollisionsOutside(Rect box){
+		
+		int dxdir = this.getSpeed().getxDirection();
+		int dydir = this.getSpeed().getyDirection();
+		int dright = this.getX() + this.getBitmap().getWidth() / 2;
+		int dleft = this.getX() - this.getBitmap().getWidth() / 2;
+		int dtop = this.getY() + this.getBitmap().getHeight() / 2;
+		int dbottom = this.getY() - this.getBitmap().getHeight() / 2;
+		
+		
+		// check collision with left wall if heading right
+		if (dxdir == Speed.DIRECTION_RIGHT && dright >= box.left && dright < box.left + (this.getBitmap().getWidth()/2) 
+				&& ((dtop > box.top && dtop < box.bottom) 
+						|| (dbottom > box.top && dbottom < box.bottom))) {
+			this.getSpeed().togglexDirection();
+		}
+		
+		
+		// check collision with right wall if heading left
+		if (dxdir == Speed.DIRECTION_LEFT && dleft <= box.right && dleft > box.right - (this.getBitmap().getWidth()/2)
+				&& ((dtop > box.top && dtop < box.bottom) 
+						|| (dbottom > box.top && dbottom < box.bottom))) {
+			this.getSpeed().togglexDirection();
+		}
+		
+		// check collision with bottom wall if heading down
+		if (dydir == Speed.DIRECTION_DOWN && dbottom >= box.top && dbottom < box.top + (this.getBitmap().getHeight()/2)
+				&& ((dright > box.left && dright < box.right) 
+						|| (dleft > box.left && dleft < box.right))) {
+			this.getSpeed().toggleyDirection();
+		}
+		
+		// check collision with top wall if heading up
+		if (dydir == Speed.DIRECTION_UP && dtop <= box.bottom && dtop > box.bottom - (this.getBitmap().getHeight()/2)
+				&& ((dright > box.left && dright < box.right) 
+						|| (dleft > box.left && dleft < box.right))) {
+			this.getSpeed().toggleyDirection();
+		}
+	}
+	
+	public void detectCollisions(ArrayList<Rect> obstacles){
+		
+		// Assuming framebox is in the first location
+		detectCollisionsInside(obstacles.get(0));
+		
+		
+		// Detecting collisions 
+		for ( int i = 1; i < obstacles.size(); i++ ) {
+			//detectCollisionsInside(obstacles.get(i));
+			detectCollisionsOutside(obstacles.get(i));
 		}
 	}
 	
@@ -119,7 +181,24 @@ public class Droid {
 			if ( speedFactor != 0 ) {
 			
 				// Detect collisions and make proper changes when necessary
-				detectCollisions(frameBox);
+				detectCollisionsInside(frameBox);
+				
+				//Log.d(TAG, "x=" + this.x + " xv=" + this.speed.getXv());
+				
+				x += (speed.getXv() * speed.getxDirection() * speedFactor);
+				y += (speed.getYv() * speed.getyDirection() * speedFactor);
+			}
+		}
+	}
+	
+	public void update(ArrayList<Rect> obstacles, int speedFactor) {
+		if (!touched){
+			
+			//Saving up on paused animation
+			if ( speedFactor != 0 ) {
+			
+				// Detect collisions and make proper changes when necessary
+				detectCollisions(obstacles);
 				
 				//Log.d(TAG, "x=" + this.x + " xv=" + this.speed.getXv());
 				
