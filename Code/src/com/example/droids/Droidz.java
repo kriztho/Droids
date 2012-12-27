@@ -28,6 +28,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	private FloatingDisplay floatingDisplay;
 	private ArrayList<Rect> obstacles;
 	private boolean collisionDetection = true; 
+	private int finger;
 
 	public Droidz(Context context) {
 		super(context);
@@ -46,6 +47,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		animationSpeedFactor = 1;
 		
 		obstacles = new ArrayList<Rect>();
+		finger = -1;
 		
 		setFocusable(true);
 	}
@@ -71,8 +73,14 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			 
 			 //addDroid((int)(event.getX()), (int)(event.getY()));
-			 
-			 addObstacle((int)(event.getX()), (int)(event.getY()), 100, 100);
+			 if ( finger == -1 )
+				 finger = addObstacle((int)(event.getX()), (int)(event.getY()), 100, 100);
+			 else {
+				 obstacles.get(finger).left = (int) (event.getX() - 50); 
+				 obstacles.get(finger).right = obstacles.get(finger).left + 100;
+				 obstacles.get(finger).top = (int) (event.getY() - 50);
+				 obstacles.get(finger).bottom = obstacles.get(finger).top + 100;
+			 }
 					 
 			 /*
 			 //delegating event handling to the droid
@@ -83,8 +91,10 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			 
 		 } if (event.getAction() == MotionEvent.ACTION_MOVE ) {
 			 
-			 //addObstacle((int)(event.getX()), (int)(event.getY()), 100, 100);
-			 //addObstacleAt(1, (int)(event.getX()), (int)(event.getY()), 100, 100);
+			 obstacles.get(finger).left = (int) (event.getX() - 50); 
+			 obstacles.get(finger).right = obstacles.get(finger).left + 100;
+			 obstacles.get(finger).top = (int) (event.getY() - 50);
+			 obstacles.get(finger).bottom = obstacles.get(finger).top + 100;
 			 
 			 //the gestures
 			 /*
@@ -109,17 +119,19 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 }
 	  return true;
 	 }
-	public void addObstacle(Rect obstacle) {
+	public int addObstacle(Rect obstacle) {
 		obstacles.add(obstacle);
+		return obstacles.indexOf(obstacle);
 	}
 	
-	public void addObstacle(int x, int y, int width, int height) {
+	public int addObstacle(int x, int y, int width, int height) {
 		 int left = (int) (x - (width / 2.0));
 		 int right = left + width;
 		 int top = (int) (y - (height / 2.0));
 		 int bottom = top + height;
 		 Rect obstacle = new Rect(left, top, right, bottom);
 		obstacles.add(obstacle);
+		return obstacles.indexOf(obstacle);
 	}
 	
 	public void addObstacleAt(int index, int x, int y, int width, int height) {
@@ -229,7 +241,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		if ( currentNumberDroids < MAX_NUMBER_DROIDS ) {
 			if ( index < MAX_NUMBER_DROIDS ) {
 				droids[index] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y );
-				//droids[index] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y, 2 );
+				//droids[index] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y, 3 );
 				currentNumberDroids++;
 				index++;
 				
@@ -257,8 +269,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			// Add missing droids
 			int missingDroids = newNumberDroids - currentNumberDroids;
 			for ( int i = 0; i < missingDroids; i++ ) {
-				//addDroid(rndInt(frameBox.left, frameBox.right), rndInt(frameBox.top, frameBox.bottom)); 
-				addDroid(50, frameBox.bottom / 2);
+				addDroid(rndInt(frameBox.left, frameBox.right), rndInt(frameBox.top, frameBox.bottom)); 
 			}
 			
 			//Delete droids

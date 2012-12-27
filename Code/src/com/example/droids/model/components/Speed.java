@@ -43,20 +43,20 @@ public class Speed {
 		switch(testSpeedCase) {
 			case 0:
 				//To the right
-				this.xv = 5;
+				this.xv = 1;
 				this.yv = 0;
 				this.xDirection = DIRECTION_RIGHT;
 				break;
 			case 1:
 				//To the left
-				this.xv = 5;
+				this.xv = 1;
 				this.yv = 0;
 				this.xDirection = DIRECTION_LEFT;
 				break;
 			case 2:
 				//To the top
 				this.xv = 0;
-				this.yv = 5;
+				this.yv = 1;
 				this.yDirection = DIRECTION_UP;
 				break;
 			case 3:

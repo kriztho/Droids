@@ -125,10 +125,10 @@ public class Droid {
 		
 		int dxdir = this.getSpeed().getxDirection();
 		int dydir = this.getSpeed().getyDirection();
-		int dright = this.getX() + this.getBitmap().getWidth() / 2;
-		int dleft = this.getX() - this.getBitmap().getWidth() / 2;
-		int dtop = this.getY() + this.getBitmap().getHeight() / 2;
-		int dbottom = this.getY() - this.getBitmap().getHeight() / 2;
+		int dright = this.getX() + (this.getBitmap().getWidth() / 2);
+		int dleft = this.getX() - (this.getBitmap().getWidth() / 2);
+		int dtop = this.getY() - (this.getBitmap().getHeight() / 2);
+		int dbottom = this.getY() + (this.getBitmap().getHeight() / 2);
 		
 		
 		// check collision with left wall if heading right
@@ -195,7 +195,7 @@ public class Droid {
 		if (!touched){
 			
 			//Saving up on paused animation
-			if ( speedFactor != 0 ) {
+			if ( speedFactor != 0 ) {		
 			
 				// Detect collisions and make proper changes when necessary
 				detectCollisions(obstacles);
