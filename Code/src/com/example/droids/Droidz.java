@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import com.example.droids.model.Droid;
 
 import android.content.Context;
+import android.gesture.Gesture;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
@@ -29,6 +33,8 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	private ArrayList<Rect> obstacles;
 	private boolean collisionDetection = true; 
 	private int finger;
+	private GestureDetector gestureDetector;
+	private boolean isScrolling = false;
 
 	public Droidz(Context context) {
 		super(context);
@@ -49,15 +55,106 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		obstacles = new ArrayList<Rect>();
 		finger = -1;
 		
+		gestureDetector = new GestureDetector(context, new GestureListener());
+		
 		setFocusable(true);
+	}
+	
+	private class GestureListener extends GestureDetector.SimpleOnGestureListener {				
+		
+		// Notified when a tap occurs with the down MotionEvent that triggered it.
+		// NECESSARY TO RETURN TRUE TO LET OTHER METHODS FIRE AND CATCH TOUCHES!!
+		@Override
+		public boolean onDown(MotionEvent e) {			
+			return true;
+		}
+		
+		// Notified when a double-tap occurs.
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			addDroid((int)(e.getX()), (int)(e.getY()));
+			//makeToast("DoubleTap");
+			return false;
+		}
+
+		// Notified when an event within a double-tap gesture occurs, 
+		// including the down, move, and up events.
+		@Override
+		public boolean onDoubleTapEvent(MotionEvent e) {
+			//makeToast("DoubleTapEvent");
+			return false;
+		}
+		
+		//Notified when a single-tap occurs.
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			
+			addObstacle((int)(e.getX()), (int)(e.getY()), 100, 100);			 
+			
+			return false;
+		}
+
+		// Notified of a fling event when it occurs with the initial on down 
+		// MotionEvent and the matching up MotionEvent.
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		// Notified when a long press occurs with the initial on down 
+		// MotionEvent that trigged it.
+		@Override
+		public void onLongPress(MotionEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		// Notified when a scroll occurs with the initial on down 
+		// MotionEvent and the current move MotionEvent.
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+				float distanceY) {
+			
+			isScrolling = true;
+			
+			if ( finger == -1 ) {
+				 finger = 1;
+				 addObstacleAt(finger, (int)(e2.getX()), (int)(e1.getY()), 100, 100);
+			} else {
+				 obstacles.get(finger).left = (int) (e2.getX() - 50); 
+				 obstacles.get(finger).right = obstacles.get(finger).left + 100;
+				 obstacles.get(finger).top = (int) (e2.getY() - 50);
+				 obstacles.get(finger).bottom = obstacles.get(finger).top + 100;
+			 }				
+			
+			 return false;
+		}
+
+		// The user has performed a down MotionEvent and not performed 
+		// a move or up yet.
+		@Override
+		public void onShowPress(MotionEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		// Notified when a tap occurs with the up MotionEvent that triggered it.
+		@Override
+		public boolean onSingleTapUp(MotionEvent e) {
+			return false;
+		}
+		
 	}
 	
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		super.surfaceCreated(holder);
 		
+		// Add framebox at the very first position
 		if ( obstacles.size() == 0 )
-			addObstacle(frameBox);					// Adding the framebox
+			addObstacleAt(0,frameBox);					// Adding the framebox
 		
 		//Heads up display
 		floatingDisplay = new FloatingDisplay(2, "bottomleft", Color.WHITE, getWidth(), getHeight());
@@ -65,39 +162,34 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		floatingDisplay.addParam("Droids", currentNumberDroids);
 	}
 
-
-
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		 
-		 if (event.getAction() == MotionEvent.ACTION_DOWN) {
+		
+		if ( gestureDetector.onTouchEvent(event) )
+			return true;
+		
+		if ( event.getAction() == MotionEvent.ACTION_UP ) {
+			if ( isScrolling ) {
+				
+				// Handle when scroll finished
+				isScrolling = false;							
+				obstacles.get(finger).setEmpty();
+			}
+		}
+		return false;
+		/*
+		 if (event.getAction() == MotionEvent.ACTION_DOWN) {			 								 
 			 
-			 //addDroid((int)(event.getX()), (int)(event.getY()));
-			 if ( finger == -1 )
-				 finger = addObstacle((int)(event.getX()), (int)(event.getY()), 100, 100);
-			 else {
-				 obstacles.get(finger).left = (int) (event.getX() - 50); 
-				 obstacles.get(finger).right = obstacles.get(finger).left + 100;
-				 obstacles.get(finger).top = (int) (event.getY() - 50);
-				 obstacles.get(finger).bottom = obstacles.get(finger).top + 100;
-			 }
-					 
-			 /*
 			 //delegating event handling to the droid
 			 if ( droid != null ) {
 				 droid.handleActionDown((int)event.getX(), (int)event.getY());
 			 }
-			 */
+			 
 			 
 		 } if (event.getAction() == MotionEvent.ACTION_MOVE ) {
-			 
-			 obstacles.get(finger).left = (int) (event.getX() - 50); 
-			 obstacles.get(finger).right = obstacles.get(finger).left + 100;
-			 obstacles.get(finger).top = (int) (event.getY() - 50);
-			 obstacles.get(finger).bottom = obstacles.get(finger).top + 100;
-			 
+			 			 
 			 //the gestures
-			 /*
+			 
 			 if( droid!= null) {
 				 if (droid.isTouched()) {
 					 //the droid was picked up and is being dragged
@@ -105,23 +197,29 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 					 droid.setY((int)event.getY());
 				 }
 			 }
-			 */
+			 
 			 
 		 } if (event.getAction() == MotionEvent.ACTION_UP ){
-			 /*
+			 
 			 if( droid!= null) {
 				 //touch was released
 				 if (droid.isTouched()) {
 					 droid.setTouched(false);
 				 }
-			 }
-			 */
+			 }			 
 		 }
+		 
 	  return true;
+	  */
 	 }
+	
 	public int addObstacle(Rect obstacle) {
 		obstacles.add(obstacle);
 		return obstacles.indexOf(obstacle);
+	}
+	
+	public void addObstacleAt(int index, Rect obstacle) {
+		obstacles.add(index, obstacle);		
 	}
 	
 	public int addObstacle(int x, int y, int width, int height) {
@@ -169,12 +267,16 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 paint.setColor(Color.GREEN);
 		 paint.setStyle(Paint.Style.STROKE);
 		 canvas.drawRect(obstacles.get(0), paint);
+		 
+		 // Draw the finger with a different color
+		 paint.setColor(Color.YELLOW);
+		 canvas.drawRect(obstacles.get(1), paint);
 		
 		 // Draw the rest of the obstacles
 		 paint.setColor(Color.RED);
 		 
 		// Drawing all droids in the array
-		 for ( int i = 1; i < obstacles.size(); i++ ) {
+		 for ( int i = 2; i < obstacles.size(); i++ ) {
 			 canvas.drawRect(obstacles.get(i), paint);
 		 }
 	}

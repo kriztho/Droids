@@ -13,7 +13,7 @@ import android.widget.Toast;
 import android.util.Log;
 
 public class MainGamePanel extends SurfaceView implements 
-  SurfaceHolder.Callback {		
+  SurfaceHolder.Callback {
 	
 	//Tag for logging on Android's Log
 	private static final String TAG = MainGamePanel.class.getSimpleName();
