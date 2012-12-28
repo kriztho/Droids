@@ -268,15 +268,21 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 paint.setStyle(Paint.Style.STROKE);
 		 canvas.drawRect(obstacles.get(0), paint);
 		 
-		 // Draw the finger with a different color
-		 paint.setColor(Color.YELLOW);
-		 canvas.drawRect(obstacles.get(1), paint);
+		 int start = 1;
+		 
+		 if ( finger == 1 ) {
+			 // Draw the finger with a different color
+			 paint.setColor(Color.YELLOW);
+			 canvas.drawRect(obstacles.get(1), paint);
+			 
+			 start = 2;
+		 }
 		
 		 // Draw the rest of the obstacles
 		 paint.setColor(Color.RED);
 		 
 		// Drawing all droids in the array
-		 for ( int i = 2; i < obstacles.size(); i++ ) {
+		 for ( int i = start; i < obstacles.size(); i++ ) {
 			 canvas.drawRect(obstacles.get(i), paint);
 		 }
 	}
