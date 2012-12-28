@@ -26,6 +26,28 @@ public class ElaineAnimated {
 	
 	private Speed speed;
 	
+	private boolean walking;
+	private boolean showSource;
+
+	private String direction;
+
+	public ElaineAnimated (Bitmap bitmap, int x, int y, int fps, int frameCount ) {
+		
+		this.bitmap = bitmap;
+		this.x = x;
+		this.y = y;
+		currentFrame = 0;
+		frameNr = frameCount;
+		spriteWidth = bitmap.getWidth() / frameCount;
+		spriteHeight = bitmap.getHeight();
+		sourceRect = new Rect(0,0, spriteWidth, spriteHeight);
+		framePeriod = 1000 / fps;
+		frameTicker = 0l;
+		this.speed = new Speed(0,0);
+		this.walking = false;
+		this.showSource = false;
+	}
+	
 	public Bitmap getBitmap() {
 		return bitmap;
 	}
@@ -113,38 +135,82 @@ public class ElaineAnimated {
 	public void setSpeed(Speed speed) {
 		this.speed = speed;
 	}
-
-	public ElaineAnimated (Bitmap bitmap, int x, int y, int fps, int frameCount ) {
+	
+	//////////////////////////////////////////////
+	// Controlling Methods
+	/////////////////////////////////////////////
+	
+	public void walk(String direction) {
 		
-		this.bitmap = bitmap;
-		this.x = x;
-		this.y = y;
-		currentFrame = 0;
-		frameNr = frameCount;
-		spriteWidth = bitmap.getWidth() / frameCount;
-		spriteHeight = bitmap.getHeight();
-		sourceRect = new Rect(0,0, spriteWidth, spriteHeight);
-		framePeriod = 1000 / fps;
-		frameTicker = 0l;
-		this.speed = new Speed(2,0);
+		this.walking = true;
+		this.direction = direction;
+		
+		if ( direction == "right") {
+			this.speed.setxDirection(Speed.DIRECTION_RIGHT);
+			this.speed.setXv(2);
+			this.speed.setYv(0);
+		}
+		
+		if ( direction == "left") {
+			this.speed.setxDirection(Speed.DIRECTION_LEFT);
+			this.speed.setXv(2);
+			this.speed.setYv(0);
+		}
+		
+		if ( direction == "up") {
+			this.speed.setyDirection(Speed.DIRECTION_UP);
+			this.speed.setXv(0);
+			this.speed.setYv(2);
+		}
+		
+		if ( direction == "down") {
+			this.speed.setyDirection(Speed.DIRECTION_DOWN);
+			this.speed.setXv(0);
+			this.speed.setYv(2);
+		}
+		
 	}
 	
-	public void update( long gameTime ){
-		if (gameTime > frameTicker + framePeriod){
-			frameTicker = gameTime;
-			
-			// increment the frame
-			currentFrame++;
-			if ( currentFrame >= frameNr ) {
-				currentFrame = 0;
-			}
+	public void stop() {
+		this.walking = false;
+		stopX();
+		stopY();
+	}
+	
+	public void stopX() {
+		this.speed.setXv(0);
+	}
+	
+	public void stopY() {
+		this.speed.setYv(0);
+	}
+	
+	public void detectCollisions(Rect box) {
+		// check collision with right wall if heading right
+		if (this.getSpeed().getxDirection() == Speed.DIRECTION_RIGHT
+				&& this.getX() + this.getSpriteWidth() >= box.width()) {
+			//elaine.getSpeed().togglexDirection();
+			this.stopX();
 		}
-		// define the rectangle to cut out sprite
-		this.sourceRect.left = currentFrame * spriteWidth;
-		this.sourceRect.right = this.sourceRect.left + spriteWidth;
+		// check collision with left wall if heading left
+		if (this.getSpeed().getxDirection() == Speed.DIRECTION_LEFT
+				&& this.getX() - this.getSpriteWidth()/5 <= 0) {
+			//elaine.getSpeed().togglexDirection();
+			this.stopX();
+		}
 		
-		x += (speed.getXv() * speed.getxDirection());
-		y += (speed.getYv() * speed.getyDirection());
+		// check collision with right wall if heading right
+		if (this.getSpeed().getyDirection() == Speed.DIRECTION_DOWN
+				&& this.getY() + this.getSpriteHeight() >= box.height()) {
+			//elaine.getSpeed().togglexDirection();
+			this.stopY();
+		}
+		// check collision with left wall if heading left
+		if (this.getSpeed().getyDirection() == Speed.DIRECTION_UP
+				&& this.getY() - this.getSpriteHeight()/2 <= 0) {
+			//elaine.getSpeed().togglexDirection();
+			this.stopY();
+		}
 	}
 	
 	public void draw( Canvas canvas ){
@@ -152,12 +218,39 @@ public class ElaineAnimated {
 		Rect destRect = new Rect(getX(), getY(), getX() + spriteWidth, getY() + spriteHeight);
 		canvas.drawBitmap(bitmap, sourceRect, destRect, null);
 		
-		canvas.drawBitmap(bitmap, 20, 150, null);
-		Paint paint = new Paint();
-		paint.setARGB(50, 0, 255, 0);
-		canvas.drawRect(20 + (currentFrame * destRect.width()),150, 
-						20 + (currentFrame * destRect.width()) + destRect.width(), 
-						150 + destRect.height(), paint);
+		if ( showSource ) {
+			canvas.drawBitmap(bitmap, 20, 150, null);
+			Paint paint = new Paint();
+			paint.setARGB(50, 0, 255, 0);
+			canvas.drawRect(20 + (currentFrame * destRect.width()),150, 
+							20 + (currentFrame * destRect.width()) + destRect.width(), 
+							150 + destRect.height(), paint);
+		}
+	}
+	
+	public void update( long gameTime, Rect frameBox ){
+		
+		if ( walking ) {
+			
+			detectCollisions(frameBox);
+			
+			if (gameTime > frameTicker + framePeriod){
+				frameTicker = gameTime;
+				
+				// increment the frame
+				currentFrame++;
+				if ( currentFrame >= frameNr ) {
+					currentFrame = 0;
+				}
+			}
+		}
+		// define the rectangle to cut out sprite
+		this.sourceRect.left = currentFrame * spriteWidth;
+		this.sourceRect.right = this.sourceRect.left + spriteWidth;
+		
+		
+		x += (speed.getXv() * speed.getxDirection());
+		y += (speed.getYv() * speed.getyDirection());			
 	}
 
 }
