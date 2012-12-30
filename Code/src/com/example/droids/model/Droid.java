@@ -25,7 +25,7 @@ public class Droid {
 	
 	public Droid( Bitmap bitmap, int x, int y, int testSpeedCase ) {
 		this.bitmap = bitmap;
-		this.x = x;
+		this.x = x;	
 		this.y = y;
 		this.speed = new Speed(testSpeedCase);
 	}

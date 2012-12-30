@@ -130,7 +130,7 @@ public class OnScreenButton {
 	
 	public void release() {
 		touched = false;
-		color = Color.WHITE;
+		color = Color.GRAY;
 	}
 	
 	public void render(Canvas canvas) {

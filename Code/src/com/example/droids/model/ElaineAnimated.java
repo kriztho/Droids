@@ -2,8 +2,11 @@ package com.example.droids.model;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import com.example.droids.model.components.Speed;
 
@@ -12,6 +15,8 @@ public class ElaineAnimated {
 	private static final String TAG = ElaineAnimated.class.getSimpleName();
 	
 	private Bitmap bitmap;		// the animation sequence
+	private Bitmap bitmapOriginal;
+	private Bitmap bitmapReversed;
 	private Rect sourceRect;	// the rectangle to be drawn from the animation bitmap
 	private int frameNr;		// number of frames in animation
 	private int currentFrame;	// the current frame
@@ -26,14 +31,17 @@ public class ElaineAnimated {
 	
 	private Speed speed;
 	
-	private boolean walking;
+	private boolean animate;
 	private boolean showSource;
+	private boolean running;
 
 	private String direction;
 
 	public ElaineAnimated (Bitmap bitmap, int x, int y, int fps, int frameCount ) {
-		
-		this.bitmap = bitmap;
+				
+		this.bitmapOriginal = bitmap;
+		this.bitmapReversed = flip(bitmap);
+		this.bitmap = this.bitmapOriginal;
 		this.x = x;
 		this.y = y;
 		currentFrame = 0;
@@ -44,7 +52,8 @@ public class ElaineAnimated {
 		framePeriod = 1000 / fps;
 		frameTicker = 0l;
 		this.speed = new Speed(0,0);
-		this.walking = false;
+		this.animate = false;
+		this.running = false;
 		this.showSource = false;
 	}
 	
@@ -86,6 +95,10 @@ public class ElaineAnimated {
 
 	public int getY() {
 		return y;
+	}
+	
+	public boolean getRunning() {
+		return running;
 	}
 
 	public void setBitmap(Bitmap bitmap) {
@@ -136,43 +149,86 @@ public class ElaineAnimated {
 		this.speed = speed;
 	}
 	
+	public void setRunning(boolean running) {
+		this.running = running;				
+	}
+	
 	//////////////////////////////////////////////
 	// Controlling Methods
 	/////////////////////////////////////////////
 	
-	public void walk(String direction) {
+	Bitmap flip(Bitmap d)
+	{
+	    Matrix m = new Matrix();
+	    m.preScale(-1, 1);
+	    Bitmap dst = Bitmap.createBitmap(d, 0, 0, d.getWidth(), d.getHeight(), m, false);
+	    dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+	    return (new BitmapDrawable(dst)).getBitmap();
+	}
+	
+	public void move(String direction) {
 		
-		this.walking = true;
+		this.animate = true;
 		this.direction = direction;
 		
-		if ( direction == "right") {
-			this.speed.setxDirection(Speed.DIRECTION_RIGHT);
-			this.speed.setXv(2);
-			this.speed.setYv(0);
-		}
-		
-		if ( direction == "left") {
-			this.speed.setxDirection(Speed.DIRECTION_LEFT);
-			this.speed.setXv(2);
-			this.speed.setYv(0);
-		}
-		
-		if ( direction == "up") {
-			this.speed.setyDirection(Speed.DIRECTION_UP);
-			this.speed.setXv(0);
-			this.speed.setYv(2);
-		}
-		
-		if ( direction == "down") {
-			this.speed.setyDirection(Speed.DIRECTION_DOWN);
-			this.speed.setXv(0);
-			this.speed.setYv(2);
+		if ( !running ) {	///// Walking
+			if ( direction == "right") {
+				this.speed.setxDirection(Speed.DIRECTION_RIGHT);
+				this.speed.setXv(2);
+				this.speed.setYv(0);
+				this.bitmap = this.bitmapOriginal;
+			}
+			
+			if ( direction == "left") {
+				this.speed.setxDirection(Speed.DIRECTION_LEFT);
+				this.speed.setXv(2);
+				this.speed.setYv(0);
+				this.bitmap = this.bitmapReversed;
+			}
+			
+			if ( direction == "up") {
+				this.speed.setyDirection(Speed.DIRECTION_UP);
+				this.speed.setXv(0);
+				this.speed.setYv(2);
+			}
+			
+			if ( direction == "down") {
+				this.speed.setyDirection(Speed.DIRECTION_DOWN);
+				this.speed.setXv(0);
+				this.speed.setYv(2);
+			}
+		} else { ///// Running
+			if ( direction == "right") {
+				this.speed.setxDirection(Speed.DIRECTION_RIGHT);
+				this.speed.setXv(4);
+				this.speed.setYv(0);
+				this.bitmap = this.bitmapOriginal;
+			}
+			
+			if ( direction == "left") {
+				this.speed.setxDirection(Speed.DIRECTION_LEFT);
+				this.speed.setXv(4);
+				this.speed.setYv(0);
+				this.bitmap = this.bitmapReversed;
+			}
+			
+			if ( direction == "up") {
+				this.speed.setyDirection(Speed.DIRECTION_UP);
+				this.speed.setXv(0);
+				this.speed.setYv(4);
+			}
+			
+			if ( direction == "down") {
+				this.speed.setyDirection(Speed.DIRECTION_DOWN);
+				this.speed.setXv(0);
+				this.speed.setYv(4);
+			}
 		}
 		
 	}
 	
 	public void stop() {
-		this.walking = false;
+		this.animate = false;
 		stopX();
 		stopY();
 	}
@@ -230,7 +286,7 @@ public class ElaineAnimated {
 	
 	public void update( long gameTime, Rect frameBox ){
 		
-		if ( walking ) {
+		if ( animate ) {
 			
 			detectCollisions(frameBox);
 			

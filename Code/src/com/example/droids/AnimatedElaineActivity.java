@@ -3,6 +3,7 @@ package com.example.droids;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,13 +20,15 @@ public class AnimatedElaineActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		//setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		
 		//request to turn the title OFF
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//making it full screen
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);		
 		
 		gamePanel = new AnimatedElaine(getApplicationContext());
-		setContentView(gamePanel);			
+		setContentView(gamePanel);
 	}
 
 	@Override

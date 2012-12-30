@@ -23,10 +23,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.droids.LaunchDemo"
-            android:label="@string/title_activity_launch_demo" >
-        </activity>
-        <activity
             android:name="com.example.droids.Preferences"
             android:label="@string/title_activity_preferences" >
         </activity>
@@ -40,6 +36,7 @@
         </activity>
         <activity
             android:name="com.example.droids.AnimatedElaineActivity"
+            android:screenOrientation="landscape"
             android:label="@string/title_activity_animated_elaine" >
         </activity>
         <activity

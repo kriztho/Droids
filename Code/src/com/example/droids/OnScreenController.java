@@ -2,6 +2,7 @@ package com.example.droids;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 
 public class OnScreenController {
 	
@@ -12,6 +13,7 @@ public class OnScreenController {
 	private OnScreenButton[] buttons;
 	private int layout;
 	private char size;
+	private Rect frame;
 
 	public OnScreenController(int numButtons, int layout, int x, int y, char size, int alpha) {		
 		this.numButtons = numButtons;
@@ -20,7 +22,17 @@ public class OnScreenController {
 		this.x = x;
 		this.y = y;
 		this.size = size;
-		this.color = Color.WHITE;
+		this.color = Color.GRAY;
+		createController();			
+	}
+	
+	public OnScreenController(int numButtons, int layout, Rect frame, char size, int alpha) {		
+		this.numButtons = numButtons;
+		this.layout = layout;
+		this.alpha = alpha;
+		this.frame = frame;
+		this.size = size;
+		this.color = Color.GRAY;
 		createController();			
 	}
 	
@@ -31,8 +43,8 @@ public class OnScreenController {
 		if ( numButtons == 2 ) {
 			//Horizontal
 			if ( layout == 0 ) {
-				buttons[0] = new OnScreenButton(x, y, size, color, alpha);
-				buttons[1] = new OnScreenButton(x + buttons[0].getWidth() + 3, y, size, color, alpha);
+				buttons[0] = new OnScreenButton(frame.right - 156, frame.bottom - 80, size, color, alpha);
+				buttons[1] = new OnScreenButton(buttons[0].getX() + buttons[0].getWidth() + 3, buttons[0].getY(), size, color, alpha);
 			} else { //Vertical
 				
 			}
@@ -45,7 +57,7 @@ public class OnScreenController {
 				buttons[2] = new OnScreenButton(buttons[1].getX() + buttons[1].getWidth() + 3, y, size, color, alpha);
 				buttons[3] = new OnScreenButton(buttons[2].getX() + buttons[2].getWidth() + 3, y, size, color, alpha);
 			} else {			// On a cross shape
-				buttons[0] = new OnScreenButton(3, 374, size, color, alpha);
+				buttons[0] = new OnScreenButton(3, frame.bottom - 103, size, color, alpha);
 				buttons[1] = new OnScreenButton(buttons[0].getX() + buttons[0].getWidth(), 
 												buttons[0].getY() - buttons[0].getHeight(), 
 													size, color, alpha);

@@ -20,7 +20,10 @@ public final class R {
         public static final int ic_help=0x7f020002;
         public static final int ic_launcher=0x7f020003;
         public static final int increase=0x7f020004;
-        public static final int walk_elaine=0x7f020005;
+        public static final int mario_background=0x7f020005;
+        public static final int onebackground=0x7f020006;
+        public static final int rpg_background=0x7f020007;
+        public static final int walk_elaine=0x7f020008;
     }
     public static final class id {
         public static final int about=0x7f08000c;

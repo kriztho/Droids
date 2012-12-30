@@ -38,6 +38,18 @@ public class MainGamePanel extends SurfaceView implements
 	}
 
 	@Override
+	public void setZOrderMediaOverlay(boolean isMediaOverlay) {
+		// TODO Auto-generated method stub
+		super.setZOrderMediaOverlay(isMediaOverlay);
+	}
+
+	@Override
+	public void setZOrderOnTop(boolean onTop) {
+		// TODO Auto-generated method stub
+		super.setZOrderOnTop(onTop);
+	}
+
+	@Override
 	public void surfaceCreated(SurfaceHolder holder) { 
 		 
 		 if ( thread != null ){
