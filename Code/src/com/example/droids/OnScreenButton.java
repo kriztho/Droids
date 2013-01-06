@@ -123,6 +123,17 @@ public class OnScreenButton {
 		return touched;
 	}
 	
+	public boolean isTouchingNoChange(int x, int y) {
+		
+		if ( x > this.x && x < this.x + this.width && y > this.y && y < this.y + this.height ) {
+			touched = true;
+		} else {
+			touched = false;
+		}
+		
+		return touched;
+	}
+	
 	public void touch() {
 		touched = true;
 		color = Color.RED;

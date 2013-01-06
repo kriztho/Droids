@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
@@ -184,7 +185,12 @@ public class FloatingDisplay {
 	
 	public boolean display( Canvas canvas ) {
 		
-		if ( canvas != null ) {
+		if ( canvas != null ) {			
+			
+			Paint backPaint = new Paint();
+			backPaint.setColor(Color.DKGRAY);
+			backPaint.setAlpha(200);
+			canvas.drawRect(x-2, y - 12, x + paramString.length() * 5 + 2, y + 5, backPaint);
 			canvas.drawText(paramString, x, y, paint);
 			return true;
 		}

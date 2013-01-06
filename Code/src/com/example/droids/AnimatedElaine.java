@@ -1,5 +1,7 @@
 package com.example.droids;
 
+import java.util.ArrayList;
+
 import com.example.droids.model.ElaineAnimated;
 import com.example.droids.model.components.Speed;
 
@@ -30,6 +32,7 @@ SurfaceHolder.Callback {
 	private Background currentBackground;
 	private int firstPointerId = INVALID_POINTER_ID;
 	private int secondPointerId = INVALID_POINTER_ID;
+	private boolean collisionDetection = true;
 
 	public AnimatedElaine(Context context) {
 		super(context);
@@ -47,11 +50,43 @@ SurfaceHolder.Callback {
 		super.surfaceCreated(holder);
 		
 		elaine = new ElaineAnimated(BitmapFactory.decodeResource( getResources(), R.drawable.walk_elaine), getWidth()/2, getHeight()/2, 5, 5);
-		frameBox = new Rect(10,10,getWidth()-10, getHeight()-10);
+		frameBox = new Rect(0, 0, getWidth(), getHeight());
 		dPad = new OnScreenController(4, 1, frameBox, 'm', 150);
 		actionButtons = new OnScreenController(2, 0, frameBox, 'l', 150);
 		
-		currentBackground = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.rpg_background), frameBox);
+		currentBackground = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.rpg_background), frameBox, createObstacles());
+	}
+	
+	public ArrayList<Rect> createObstacles() {
+		
+		ArrayList<Rect> obstacles = new ArrayList<Rect>();
+		
+		// FrameBox
+		obstacles.add(frameBox);
+		
+		// Trees
+		int twidth = 34;
+		int theight = 26;
+		obstacles.add(new Rect(64, 0, 64 + twidth, 0 + theight));
+		obstacles.add(new Rect(114, 37, 114 + twidth, 37 + theight));
+		obstacles.add(new Rect(177, 35, 177 + twidth, 35 + theight));
+		obstacles.add(new Rect(196, 103, 196 + twidth, 103 + theight));
+		obstacles.add(new Rect(161, 134, 161 + twidth, 134 + theight));		
+		obstacles.add(new Rect(127, 197, 127 + twidth, 197 + theight));		
+		obstacles.add(new Rect(33, 197, 33 + twidth, 197 + theight));
+		obstacles.add(new Rect(1, 261, 1 + twidth, 261 + theight));
+		
+		// Water
+		obstacles.add(new Rect(125, 219, 125 + 261, 219 + 39));
+		obstacles.add(new Rect(59, 251, 59 + 421, 251 + 37));
+		obstacles.add(new Rect(28, 282, 28 + 452, 282 + 38));
+		
+		// Hills
+		obstacles.add(new Rect(319, 0, 319 + 161, 222));
+		obstacles.add(new Rect(0, 0, 31, 33));
+		obstacles.add(new Rect(0, 32, 64, 32 + 94));
+		
+		return obstacles;
 	}
 	
 	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -387,56 +422,75 @@ SurfaceHolder.Callback {
 				break;
 			}
 			
-			case MotionEvent.ACTION_MOVE: {
+			case MotionEvent.ACTION_MOVE: {			
+				
+				for ( int i = 0; i < e.getPointerCount(); i++ ) {
 					
-				// Find the pointer that left
-				int pointerIndexNew = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) 
-						>> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-		        int pointerId = e.getPointerId(pointerIndexNew);
-		        
-		        int historySize = e.getHistorySize();
-				if ( historySize > 0 ) {
-					float previousX = e.getHistoricalX(pointerId, historySize - 1);
-					float previousY = e.getHistoricalY(pointerId, historySize - 1);
-					int dPadButtonTouched1 = dPad.isTouching((int)previousX, (int)previousY);
-					int actionButtonTouched1 = actionButtons.isTouching((int)previousX, (int)previousY);					
+					x = e.getX(i);
+					y = e.getY(i);
+					int side = checkScreenSide((int)x, (int)y);
 					
-					x = e.getX(pointerId);
-					y = e.getY(pointerId);									
-					actionButtonTouched = actionButtons.isTouching((int)previousX, (int)previousY);
-					dPadButtonTouched = dPad.isTouching((int)x, (int)y);
-					
-					// The object that is pointed by the one that left is the one to be released
-					if ( dPadButtonTouched != -1 ) {
-						switch( dPadButtonTouched ) {
-						case 0:
-							elaine.move("left");
-							break;
-						case 1:
-							elaine.move("up");		
-							break;
-						case 2:
-							elaine.move("down");
-							break;
-						case 3:
-							elaine.move("right");
-							break;
-						default:
-							elaine.stop();
+					switch (side) {
+											
+						case 1:{		// Left half of the screen
+							
+							dPadButtonTouched = dPad.isTouching((int)x, (int)y);
+							actionButtonTouched = actionButtons.isTouchingNoChange((int)x, (int)y);
+							assert actionButtonTouched == -1;							
+							
+							switch( dPadButtonTouched ) {
+							case 0:
+								elaine.move("left");
+								break;
+							case 1:
+								elaine.move("up");
+								break;
+							case 2:
+								elaine.move("down");
+								break;
+							case 3:
+								elaine.move("right");
+								break;
+							default:
+								elaine.stop();
+								break;
+							}
+							
 							break;
 						}
-					} else if ( dPadButtonTouched1 != -1 && dPadButtonTouched == -1 ){
-						elaine.stop();
+						case 2:{		// Right half of the screen
+							
+							dPadButtonTouched = dPad.isTouchingNoChange((int)x, (int)y);
+							actionButtonTouched = actionButtons.isTouching((int)x, (int)y);
+							assert dPadButtonTouched == -1;
+							
+							if ( actionButtonTouched == -1 )
+								elaine.setRunning(false);
+							else 
+								elaine.setRunning(true);
+							
+							break;
+						}
+						default:
+							break;
 					}
-				
-					if ( actionButtonTouched1 != -1 && actionButtonTouched == -1 )
-						elaine.setRunning(false);					
 				}
 								
 				break;
 			}		
 		}
 		return true;
+	 }
+	 
+	 public int checkScreenSide(int x, int y) {
+		 
+		 int side = -1;
+		 if ( x < getWidth() / 2 )
+			 side = 1;
+		 else
+			 side = 2;
+		 
+		 return side;
 	 }
 	 
 	 public void render(Canvas canvas) {
@@ -463,8 +517,14 @@ SurfaceHolder.Callback {
 	 
 	 public void updateElaine(){
 		
-		//Updating Elaine
-		elaine.update(System.currentTimeMillis(), frameBox);
+		//Updating Elaine		 
+		 if ( collisionDetection ) {		 			 
+			 elaine.update(System.currentTimeMillis(), currentBackground.getObstacles());
+			 
+		 } else {			 
+			 elaine.update(System.currentTimeMillis(), frameBox);
+			 
+		 }
 	 }
 	 
 	 public void update() {

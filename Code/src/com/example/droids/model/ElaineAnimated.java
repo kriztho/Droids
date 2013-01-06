@@ -1,5 +1,7 @@
 package com.example.droids.model;
 
+import java.util.ArrayList;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -241,32 +243,81 @@ public class ElaineAnimated {
 		this.speed.setYv(0);
 	}
 	
-	public void detectCollisions(Rect box) {
-		// check collision with right wall if heading right
-		if (this.getSpeed().getxDirection() == Speed.DIRECTION_RIGHT
-				&& this.getX() + this.getSpriteWidth() >= box.width()) {
-			//elaine.getSpeed().togglexDirection();
+	public void detectCollisionsInside(Rect box) {
+		
+		int dxdir = this.getSpeed().getxDirection();
+		int dydir = this.getSpeed().getyDirection();
+		int dright = this.getX() + this.getSpriteWidth();
+		int dleft = this.getX();
+		int dtop = this.getY();
+		int dbottom = this.getY() + this.getSpriteHeight();
+		
+		// check collision with right wall
+		if (dxdir == Speed.DIRECTION_RIGHT && dright >= box.right) 
 			this.stopX();
-		}
-		// check collision with left wall if heading left
-		if (this.getSpeed().getxDirection() == Speed.DIRECTION_LEFT
-				&& this.getX() - this.getSpriteWidth()/5 <= 0) {
-			//elaine.getSpeed().togglexDirection();
+		
+		// check collision with left wall 
+		if (dxdir == Speed.DIRECTION_LEFT && dleft <= box.left)
+			this.stopX();		
+		
+		// check collision with bottom wall 
+		if (dydir == Speed.DIRECTION_DOWN && dbottom >= box.bottom) 
+			this.stopY();
+		
+		// check collision with top wall
+		if (dydir == Speed.DIRECTION_UP && dtop <= box.top)
+			this.stopY();
+	}
+	
+	public void detectCollisionsOutside(Rect box) {		
+		
+		int dxdir = this.getSpeed().getxDirection();
+		int dydir = this.getSpeed().getyDirection();
+		int dright = this.getX() + this.getSpriteWidth();
+		int dleft = this.getX();
+		int dtop = this.getY() + this.getSpriteHeight() / 2; // only colliding with the lower half of the sprite 
+		int dbottom = this.getY() + this.getSpriteHeight();
+		
+		
+		// check collision with left wall if heading right
+		if (dxdir == Speed.DIRECTION_RIGHT && dright >= box.left && dright < box.left + 2 
+				&& ((dtop <= box.top && dbottom >= box.top) 
+						|| (dtop >= box.top && dtop <= box.bottom))) {
 			this.stopX();
 		}
 		
-		// check collision with right wall if heading right
-		if (this.getSpeed().getyDirection() == Speed.DIRECTION_DOWN
-				&& this.getY() + this.getSpriteHeight() >= box.height()) {
-			//elaine.getSpeed().togglexDirection();
+		
+		// check collision with right wall if heading left
+		if (dxdir == Speed.DIRECTION_LEFT && dleft <= box.right && dleft > box.right - 2
+				&& ((dtop <= box.top && dbottom >= box.top) 
+						|| (dtop >= box.top && dtop <= box.bottom))) {
+			this.stopX();
+		}
+		
+		// check collision with bottom wall if heading down
+		if (dydir == Speed.DIRECTION_DOWN && dbottom >= box.top && dbottom < box.top + 2
+				&& ((dleft <= box.left && dright >= box.left) 
+						|| (dleft >= box.left && dleft <= box.right))) {
 			this.stopY();
 		}
-		// check collision with left wall if heading left
-		if (this.getSpeed().getyDirection() == Speed.DIRECTION_UP
-				&& this.getY() - this.getSpriteHeight()/2 <= 0) {
-			//elaine.getSpeed().togglexDirection();
+		
+		// check collision with top wall if heading up
+		if (dydir == Speed.DIRECTION_UP && dtop <= box.bottom && dtop > box.bottom - 2
+				&& ((dleft <= box.left && dright >= box.left) 
+						|| (dleft >= box.left && dleft <= box.right))) {
 			this.stopY();
 		}
+	}
+	
+	public void detectCollisions( ArrayList<Rect> obstacles ) {
+		
+		// Assuming framebox is in the first location
+		detectCollisionsInside(obstacles.get(0));
+		
+		// Detecting collisions 
+		for ( int i = 1; i < obstacles.size(); i++ ) {
+			detectCollisionsOutside(obstacles.get(i));
+		}		
 	}
 	
 	public void draw( Canvas canvas ){
@@ -284,11 +335,36 @@ public class ElaineAnimated {
 		}
 	}
 	
+	public void update( long gameTime, ArrayList<Rect> obstacles ){
+		
+		if ( animate ) {
+			
+			detectCollisions(obstacles);
+			
+			if (gameTime > frameTicker + framePeriod){
+				frameTicker = gameTime;
+				
+				// increment the frame
+				currentFrame++;
+				if ( currentFrame >= frameNr ) {
+					currentFrame = 0;
+				}
+			}
+		}
+		// define the rectangle to cut out sprite
+		this.sourceRect.left = currentFrame * spriteWidth;
+		this.sourceRect.right = this.sourceRect.left + spriteWidth;
+		
+		
+		x += (speed.getXv() * speed.getxDirection());
+		y += (speed.getYv() * speed.getyDirection());			
+	}
+	
 	public void update( long gameTime, Rect frameBox ){
 		
 		if ( animate ) {
 			
-			detectCollisions(frameBox);
+			detectCollisionsInside(frameBox);
 			
 			if (gameTime > frameTicker + framePeriod){
 				frameTicker = gameTime;

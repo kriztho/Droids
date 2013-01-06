@@ -84,6 +84,18 @@ public class OnScreenController {
 		return -1;
 	}
 	
+	public int isTouchingNoChange(int x, int y) {
+		
+		int buttonIndex = 0;
+		while ( buttonIndex < this.numButtons ) {
+			if ( buttons[buttonIndex].isTouchingNoChange(x, y) )
+				return buttonIndex;
+			buttonIndex++;
+		}
+		
+		return -1;
+	}
+	
 	public void touch(int buttonIndex) {
 		buttons[buttonIndex].touch();
 	}
