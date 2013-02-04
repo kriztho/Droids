@@ -23,39 +23,40 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	
 	//Tag for logging on Android's Log
 	private static final String TAG = Droidz.class.getSimpleName();
-	private static final int MAX_NUMBER_DROIDS = 30;
+	//private static final int MAX_NUMBER_DROIDS = 30;
 	
-	private Droid[] droids;
-	private int animationSpeedFactor;
-	private int currentNumberDroids;
-	private int index;
+	//private Droid[] droids;
+	//private int animationSpeedFactor;
+	//private int currentNumberDroids;
+	//private int index;
 	private FloatingDisplay floatingDisplay;
-	private ArrayList<Rect> obstacles;
-	private boolean collisionDetection = true; 
+	//private ArrayList<Rect> obstacles;
+	//private boolean collisionDetection = true; 
 	private int finger;
 	private GestureDetector gestureDetector;
 	private boolean isScrolling = false;
+	DroidzState currentState;
 
 	public Droidz(Context context) {
 		super(context);
 		
 		// adding the callback (this) to the surface holder to intercept events
-		getHolder().addCallback(this);
+		getHolder().addCallback(this);			
 		
 		//Set context
 		appContext = context;
+		finger = -1;		
+		gestureDetector = new GestureDetector(context, new GestureListener());
+		
+		// Game state
+		currentState = new DroidzState();
+		/*
 		animationSpeedFactor = 1; 				//Normal speed
 		currentNumberDroids = 0;				// Starts out with 0 droids
 		index = 0;								// Checks if there is any more droids to create within the maximum allowed
-		droids = new Droid[MAX_NUMBER_DROIDS];	//Create droid and load bitmap
-		
-		//Starts out 1X
-		animationSpeedFactor = 1;
-		
+		droids = new Droid[MAX_NUMBER_DROIDS];	//Create droid and load bitmap		
 		obstacles = new ArrayList<Rect>();
-		finger = -1;
-		
-		gestureDetector = new GestureDetector(context, new GestureListener());
+		*/				
 		
 		setFocusable(true);
 	}
@@ -99,7 +100,6 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -107,8 +107,6 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		// MotionEvent that trigged it.
 		@Override
 		public void onLongPress(MotionEvent e) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		// Notified when a scroll occurs with the initial on down 
@@ -119,6 +117,7 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			
 			isScrolling = true;
 			
+			/*
 			if ( finger == -1 ) {
 				 finger = 1;
 				 addObstacleAt(finger, (int)(e2.getX()), (int)(e1.getY()), 100, 100);
@@ -127,7 +126,18 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 				 obstacles.get(finger).right = obstacles.get(finger).left + 100;
 				 obstacles.get(finger).top = (int) (e2.getY() - 50);
 				 obstacles.get(finger).bottom = obstacles.get(finger).top + 100;
-			 }				
+			 }
+			 */
+			
+			if ( finger == -1 ) {
+				 finger = 1;
+				 addObstacleAt(finger, (int)(e2.getX()), (int)(e1.getY()), 100, 100);
+			} else {
+				 currentState.getCurrentObstacles().get(finger).left = (int) (e2.getX() - 50); 
+				 currentState.getCurrentObstacles().get(finger).right = currentState.getCurrentObstacles().get(finger).left + 100;
+				 currentState.getCurrentObstacles().get(finger).top = (int) (e2.getY() - 50);
+				 currentState.getCurrentObstacles().get(finger).bottom = currentState.getCurrentObstacles().get(finger).top + 100;
+			 }
 			
 			 return false;
 		}
@@ -136,8 +146,6 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		// a move or up yet.
 		@Override
 		public void onShowPress(MotionEvent e) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		// Notified when a tap occurs with the up MotionEvent that triggered it.
@@ -152,14 +160,28 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	public void surfaceCreated(SurfaceHolder holder) {
 		super.surfaceCreated(holder);
 		
+		// Framing box for collision detection
+		frameBox = new Rect(10, 10, getWidth()-10, getHeight()-30);				
+		
+		/*
 		// Add framebox at the very first position
 		if ( obstacles.size() == 0 )
 			addObstacleAt(0,frameBox);					// Adding the framebox
-		
+
 		//Heads up display
 		floatingDisplay = new FloatingDisplay(2, "bottomleft", Color.WHITE, getWidth(), getHeight());
 		floatingDisplay.addParam("Speed", animationSpeedFactor);
 		floatingDisplay.addParam("Droids", currentNumberDroids);
+		*/
+		
+		// Add framebox at the very first position
+		if ( currentState.getCurrentObstacles().size() == 0 )
+			addObstacleAt(0, frameBox);		
+
+		//Heads up display
+		floatingDisplay = new FloatingDisplay(2, "bottomleft", Color.WHITE, getWidth(), getHeight());
+		floatingDisplay.addParam("Speed", currentState.getAnimationSpeedFactor());
+		floatingDisplay.addParam("Droids", currentState.getCurrentNumberDroids());
 	}
 
 	@Override
@@ -172,8 +194,9 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			if ( isScrolling ) {
 				
 				// Handle when scroll finished
-				isScrolling = false;							
-				obstacles.get(finger).setEmpty();
+				isScrolling = false;
+				//obstacles.get(finger).setEmpty();
+				currentState.getCurrentObstacles().get(finger).setEmpty();
 			}
 		}
 		return false;
@@ -214,12 +237,15 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	 }
 	
 	public int addObstacle(Rect obstacle) {
-		obstacles.add(obstacle);
-		return obstacles.indexOf(obstacle);
+		//obstacles.add(obstacle);
+		//return obstacles.indexOf(obstacle);
+		currentState.getCurrentObstacles().add(obstacle);
+		return currentState.getCurrentObstacles().indexOf(obstacle);
 	}
 	
 	public void addObstacleAt(int index, Rect obstacle) {
-		obstacles.add(index, obstacle);		
+		//obstacles.add(index, obstacle);
+		currentState.getCurrentObstacles().add(index, obstacle);
 	}
 	
 	public int addObstacle(int x, int y, int width, int height) {
@@ -228,8 +254,9 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 int top = (int) (y - (height / 2.0));
 		 int bottom = top + height;
 		 Rect obstacle = new Rect(left, top, right, bottom);
-		obstacles.add(obstacle);
-		return obstacles.indexOf(obstacle);
+		//obstacles.add(obstacle);
+		//return obstacles.indexOf(obstacle);
+		 return addObstacle(obstacle);
 	}
 	
 	public void addObstacleAt(int index, int x, int y, int width, int height) {
@@ -238,11 +265,13 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 int top = (int) (y - (height / 2.0));
 		 int bottom = top + height;
 		 Rect obstacle = new Rect(left, top, right, bottom);
-		obstacles.add(index, obstacle);
+		//obstacles.add(index, obstacle);
+		 addObstacleAt(index, obstacle);
 	}
 	
 	public void removeObstacle(Rect obstacle) {
-		obstacles.remove(obstacle);
+		//obstacles.remove(obstacle);
+		currentState.getCurrentObstacles().remove(obstacle);
 	}
 	
 	public void render(Canvas canvas) {
@@ -262,11 +291,12 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	
 	public void drawObstacles(Canvas canvas) {
 		
+		/*
 		// Draw the stage as a containing box
 		 Paint paint = new Paint();
 		 paint.setColor(Color.GREEN);
 		 paint.setStyle(Paint.Style.STROKE);
-		 canvas.drawRect(obstacles.get(0), paint);
+		 canvas.drawRect(obstacles.get(0), paint);		 
 		 
 		 int start = 1;
 		 
@@ -285,19 +315,49 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 		 for ( int i = start; i < obstacles.size(); i++ ) {
 			 canvas.drawRect(obstacles.get(i), paint);
 		 }
+		 */
+		
+		// Draw the stage as a containing box
+		 Paint paint = new Paint();
+		 paint.setColor(Color.GREEN);
+		 paint.setStyle(Paint.Style.STROKE);
+		 canvas.drawRect(currentState.getCurrentObstacles().get(0), paint);		 
+		 
+		 int start = 1;
+		 
+		 if ( finger == 1 ) {
+			 // Draw the finger with a different color
+			 paint.setColor(Color.YELLOW);
+			 canvas.drawRect(currentState.getCurrentObstacles().get(1), paint);
+			 
+			 start = 2;
+		 }
+		
+		 // Draw the rest of the obstacles
+		 paint.setColor(Color.RED);
+		 
+		// Drawing all droids in the array
+		 for ( int i = start; i < currentState.getCurrentObstacles().size(); i++ ) {
+			 canvas.drawRect(currentState.getCurrentObstacles().get(i), paint);
+		 } 		 
+		 
 	}
 	 
 	public void drawDroids(Canvas canvas) {
 		 
 		// Drawing all droids in the array
-		 for ( int i = 0; i < currentNumberDroids; i++ ) {
-			 if (droids[i] != null)
-				 droids[i].draw(canvas);
-		 }
+		 //for ( int i = 0; i < currentNumberDroids; i++ ) {
+			//if (droids[i] != null)
+				 //droids[i].draw(canvas);
+		//}
+		for ( int i = 0; i < currentState.getCurrentNumberDroids(); i++ ) {
+			if ( currentState.getCurrentDroids()[i] != null )
+				currentState.getCurrentDroids()[i].draw(canvas);
+		}
 	 }
 	 
 	public void updateDroids(){
-		
+		/*
 		if ( collisionDetection == true ) {
 			
 			// Updating all droids
@@ -313,7 +373,23 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 					 droids[i].update(frameBox, animationSpeedFactor);
 			 }
 		}
-		 
+		 */
+		
+		if ( currentState.isCollisionDetection() == true ) {
+			
+			// Updating all droids
+			 for ( int i = 0; i < currentState.getCurrentNumberDroids(); i++ ) {
+				 if (currentState.getCurrentDroids()[i] != null)
+					 currentState.getCurrentDroids()[i].update(currentState.getCurrentObstacles(), currentState.getAnimationSpeedFactor());
+			 }
+			
+		} else {		 
+			// Updating all droids
+			 for ( int i = 0; i < currentState.getCurrentNumberDroids(); i++ ) {
+				 if (currentState.getCurrentDroids()[i] != null)
+					 currentState.getCurrentDroids()[i].update(frameBox, currentState.getAnimationSpeedFactor());
+			 }
+		}
 	 }
 	 
 	public void update() {
@@ -322,30 +398,48 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 	 }
 	 
 	public int getAnimationSpeedFactor() {
-		return animationSpeedFactor;
+		//return animationSpeedFactor;
+		return currentState.getAnimationSpeedFactor();
 	}
 
-	public void setAnimationSpeedFactor(int animationSpeedFactor) {
+	public void setAnimationSpeedFactor(int animationSpeedFactor) {				
+		
+		/*
 		this.animationSpeedFactor = animationSpeedFactor;
 		if ( !floatingDisplay.updateParam("Speed", animationSpeedFactor))
+			makeToast("Param SPEED couldn't be found");
+		*/
+		
+		currentState.setAnimationSpeedFactor(animationSpeedFactor);
+		if ( !floatingDisplay.updateParam("Speed", currentState.getAnimationSpeedFactor()))
 			makeToast("Param SPEED couldn't be found");
 	}
 
 	public void multiplyAnimationSpeed() {
+		/*
 		 //Multiply by speed factor all droids speeds
 		 for ( int i = 0; i < currentNumberDroids; i++ ) {
 			 if (droids[i] != null){		
 				 droids[i].multiplySpeed(animationSpeedFactor);
 			 }
 		 }
+		 */
+		
+		//Multiply by speed factor all droids speeds
+		 for ( int i = 0; i < currentState.getCurrentNumberDroids(); i++ ) {
+			 if (currentState.getCurrentDroids()[i] != null){
+				 currentState.getCurrentDroids()[i].multiplySpeed(currentState.getAnimationSpeedFactor());
+			 }
+		 }
 	 }
 	
 	public int getCurrentNumberDroids() {
-		return currentNumberDroids;
+		//return currentNumberDroids;
+		return currentState.getCurrentNumberDroids();
 	}
 	
 	public void addDroid(int x, int y) {
-		
+		/*
 		if ( currentNumberDroids < MAX_NUMBER_DROIDS ) {
 			if ( index < MAX_NUMBER_DROIDS ) {
 				droids[index] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y );
@@ -368,10 +462,34 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 			}
 		} else 
 			makeToast("Max Number Of Droids Reached");
+		*/
+		
+		if ( currentState.getCurrentNumberDroids() < currentState.getMaxNumberDroids() ) {
+			if ( currentState.getIndex() < currentState.getMaxNumberDroids()) {
+				currentState.getCurrentDroids()[currentState.getIndex()] = new Droid(BitmapFactory.decodeResource(getResources(), R.drawable.droid_1),x, y );
+				currentState.setCurrentNumberDroids(currentState.getCurrentNumberDroids() + 1);
+				currentState.setIndex(currentState.getIndex() + 1);
+				
+				//Update the floating display
+				if ( !floatingDisplay.updateParam("Droids", currentState.getCurrentNumberDroids()))
+					makeToast("Param DROIDS couldn't be found");		
+				
+			} else {				
+				currentState.getCurrentDroids()[currentState.getCurrentNumberDroids()].setX(x);
+				currentState.getCurrentDroids()[currentState.getCurrentNumberDroids()].setY(y);
+				currentState.setCurrentNumberDroids(currentState.getCurrentNumberDroids() + 1);
+				
+				//Update the floating display
+				if ( !floatingDisplay.updateParam("Droids", currentState.getCurrentNumberDroids()))
+					makeToast("Param DROIDS couldn't be found");
+			}
+		} else 
+			makeToast("Max Number Of Droids Reached");		
 	}
 	
 	public void setCurrentNumberDroids(int newNumberDroids) {
 			
+		/*
 		// Add Droids
 		if ( newNumberDroids > currentNumberDroids ) {
 			// Add missing droids
@@ -389,6 +507,32 @@ public class Droidz extends MainGamePanel implements SurfaceHolder.Callback {
 				
 				//Update the floating display
 				if ( !floatingDisplay.updateParam("Droids", currentNumberDroids))
+					makeToast("Param DROIDS couldn't be found");
+				
+			} else {
+				//Impossible to delete droids
+				makeToast("No More Droids To Delete");
+			}
+		}
+		*/
+		
+		// Add Droids
+		if ( newNumberDroids > currentState.getCurrentNumberDroids() ) {
+			// Add missing droids
+			int missingDroids = newNumberDroids - currentState.getCurrentNumberDroids();
+			for ( int i = 0; i < missingDroids; i++ ) {
+				addDroid(rndInt(frameBox.left, frameBox.right), rndInt(frameBox.top, frameBox.bottom)); 
+			}
+			
+			//Delete droids
+		} else if ( newNumberDroids < currentState.getCurrentNumberDroids() ) {
+			
+			// Possible to delete droids
+			if ( newNumberDroids >= 0 ) {
+				currentState.setCurrentNumberDroids(newNumberDroids);
+				
+				//Update the floating display
+				if ( !floatingDisplay.updateParam("Droids", currentState.getCurrentNumberDroids()))
 					makeToast("Param DROIDS couldn't be found");
 				
 			} else {

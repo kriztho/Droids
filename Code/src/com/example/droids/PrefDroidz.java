@@ -70,8 +70,8 @@ public class PrefDroidz extends PreferenceActivity implements OnPreferenceClickL
 		//Number of Droids
 		if ( preference.equals(findPreference("increaseDroids")) ) {
 			numberDroids++;
-			if ( numberDroids > 10){
-				numberDroids = 10;
+			if ( numberDroids > 30){
+				numberDroids = 30;
 				makeToast("Maximum number of Droids reached!");
 			}
 		}

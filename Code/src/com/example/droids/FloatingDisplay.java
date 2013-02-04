@@ -51,13 +51,13 @@ public class FloatingDisplay {
 	
 	protected void setPositionFromShortcut(int canvasWidth, int canvasHeight, String position) {
 		if ( position == "topleft") {
-			x = 10;
-			y = 10;
+			x = 15;
+			y = 30;
 		} else if ( position == "topright") {
 			x = canvasWidth - (paramString.length() * digitSize) - 12;
 			y = 30;
 		} else if ( position == "bottomleft") {
-			x = 10;
+			x = 15;
 			y = canvasHeight - digitSize - 3;
 		} else if ( position == "bottomright") {
 			x = canvasWidth - (paramString.length() * digitSize) - 8;
